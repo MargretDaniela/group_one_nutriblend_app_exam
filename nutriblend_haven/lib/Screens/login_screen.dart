@@ -1,6 +1,12 @@
+// ignore_for_file: deprecated_member_use, unused_element
+
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'register_screen.dart';
+import 'products_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -22,6 +28,9 @@ class _LoginScreenState extends State<LoginScreen>
   late Animation<double> _fadeAnim;
   late Animation<Offset> _slideAnim;
 
+  static const String _baseUrl =
+      'https://testing.rasmuspharmaceuticals.com/api/v1';
+
   @override
   void initState() {
     super.initState();
@@ -29,13 +38,13 @@ class _LoginScreenState extends State<LoginScreen>
       vsync: this,
       duration: const Duration(milliseconds: 700),
     );
-    _fadeAnim = CurvedAnimation(
-        parent: _animController, curve: Curves.easeOut);
+    _fadeAnim =
+        CurvedAnimation(parent: _animController, curve: Curves.easeOut);
     _slideAnim = Tween<Offset>(
       begin: const Offset(0, 0.05),
       end: Offset.zero,
-    ).animate(CurvedAnimation(
-        parent: _animController, curve: Curves.easeOut));
+    ).animate(
+        CurvedAnimation(parent: _animController, curve: Curves.easeOut));
     _animController.forward();
   }
 
@@ -47,15 +56,64 @@ class _LoginScreenState extends State<LoginScreen>
     super.dispose();
   }
 
+  bool _isEmail(String value) {
+    return RegExp(r'^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value);
+  }
+
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
     setState(() => _isLoading = true);
 
-    // TODO: call your AuthService.login() here and navigate on success
-    await Future.delayed(const Duration(seconds: 1));
+    try {
+      final input = _contactController.text.trim();
 
-    if (!mounted) return;
-    setState(() => _isLoading = false);
+      final Map<String, dynamic> body = {
+        'password': _passwordController.text,
+      };
+
+      if (_isEmail(input)) {
+        body['email'] = input;
+      } else {
+        body['contact'] = input;
+      }
+
+      final response = await http.post(
+        Uri.parse('$_baseUrl/auth/login'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: jsonEncode(body),
+      );
+
+      final data = jsonDecode(response.body);
+
+      if (response.statusCode == 200) {
+        final token = data['token'] ??
+            data['data']?['token'] ??
+            data['access_token'] ??
+            '';
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('token', token);
+
+        if (!mounted) return;
+        _showBar('Welcome back!', error: false);
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const ProductsScreen()),
+        );
+      } else {
+        final message =
+            data['message'] ?? 'Login failed. Please try again.';
+        if (!mounted) return;
+        _showBar(message, error: true);
+      }
+    } catch (e) {
+      if (!mounted) return;
+      _showBar(e.toString(), error: true);
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
   }
 
   void _showBar(String message, {required bool error}) {
@@ -68,7 +126,8 @@ class _LoginScreenState extends State<LoginScreen>
         backgroundColor:
             error ? const Color(0xFFDC2626) : const Color(0xFF16A34A),
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        shape:
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
       ),
     );
@@ -120,7 +179,8 @@ class _LoginScreenState extends State<LoginScreen>
             ),
             borderRadius: BorderRadius.circular(14),
           ),
-          child: const Icon(Icons.eco_rounded, color: Colors.white, size: 24),
+          child:
+              const Icon(Icons.eco_rounded, color: Colors.white, size: 24),
         ),
         const SizedBox(width: 12),
         Column(

@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'login_screen.dart';
@@ -140,7 +142,7 @@ class _OnboardingScreenThreeState extends State<OnboardingScreenThree>
         ),
         const SizedBox(height: 12),
         Text(
-          'Quality You\nCan Count On',
+          'Quality You Can Count On',
           style: GoogleFonts.playfairDisplay(
             fontSize: 28,
             fontWeight: FontWeight.w700,

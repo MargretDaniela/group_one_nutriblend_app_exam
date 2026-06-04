@@ -1,5 +1,9 @@
+// ignore_for_file: deprecated_member_use, unused_element
+
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:http/http.dart' as http;
 import 'login_screen.dart';
 
 class RegisterScreen extends StatefulWidget {
@@ -24,6 +28,9 @@ class _RegisterScreenState extends State<RegisterScreen>
   late AnimationController _animController;
   late Animation<double> _fadeAnim;
   late Animation<Offset> _slideAnim;
+
+  static const String _baseUrl =
+      'https://testing.rasmuspharmaceuticals.com/api/v1';
 
   @override
   void initState() {
@@ -52,15 +59,61 @@ class _RegisterScreenState extends State<RegisterScreen>
     super.dispose();
   }
 
+  bool _isEmail(String value) {
+    return RegExp(r'^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value);
+  }
+
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
     setState(() => _isLoading = true);
 
-    // TODO: call your AuthService.register() here and navigate on success
-    await Future.delayed(const Duration(seconds: 1));
+    try {
+      final input = _contactController.text.trim();
 
-    if (!mounted) return;
-    setState(() => _isLoading = false);
+      final Map<String, dynamic> body = {
+        'name': _nameController.text.trim(),
+        'password': _passwordController.text,
+        'password_confirmation': _confirmPasswordController.text,
+      };
+
+      if (_isEmail(input)) {
+        body['email'] = input;
+      } else {
+        body['contact'] = input;
+      }
+
+      final response = await http.post(
+        Uri.parse('$_baseUrl/auth/register'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: jsonEncode(body),
+      );
+
+      final data = jsonDecode(response.body);
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        if (!mounted) return;
+        _showBar('Account created successfully. Please log in.', error: false);
+        await Future.delayed(const Duration(seconds: 1));
+        if (!mounted) return;
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const LoginScreen()),
+        );
+      } else {
+        final message =
+            data['message'] ?? 'Registration failed. Please try again.';
+        if (!mounted) return;
+        _showBar(message, error: true);
+      }
+    } catch (e) {
+      if (!mounted) return;
+      _showBar(e.toString(), error: true);
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
   }
 
   void _showBar(String message, {required bool error}) {

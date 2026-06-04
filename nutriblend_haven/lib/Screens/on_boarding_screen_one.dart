@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import './on_boarding_screen_two.dart';
@@ -139,7 +141,7 @@ class _OnboardingScreenOneState extends State<OnboardingScreenOne>
         ),
         const SizedBox(height: 14),
         Text(
-          'Your Health,\nOur Priority',
+          'Your Health, Our Priority',
           style: GoogleFonts.playfairDisplay(
             fontSize: 30,
             fontWeight: FontWeight.w700,
