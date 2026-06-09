@@ -5,6 +5,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'package:shimmer/shimmer.dart';
 import 'checkout_screen.dart';
+import 'package:provider/provider.dart';
+import '../providers/cart_provider.dart';
 
 class ProductsScreen extends StatefulWidget {
   const ProductsScreen({super.key});
@@ -21,7 +23,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
   bool _isLoading = true;
   bool _hasError = false;
 
-  final List<Map<String, dynamic>> _cart = [];
+ 
   final Set<dynamic> _favourites = {};
 
   @override
@@ -62,70 +64,57 @@ class _ProductsScreenState extends State<ProductsScreen> {
     }
   }
 
-  void _addToCart(Map<String, dynamic> product) {
-    setState(() {
-      final index = _cart.indexWhere((item) => item['id'] == product['id']);
-      if (index != -1) {
-        _cart[index]['quantity'] += 1;
-      } else {
-        _cart.add({
-          'id': product['id'],
-          'name': product['name'],
-          'price': product['price'],
-          'quantity': 1,
-        });
-      }
-    });
+ void _addToCart(Map<String, dynamic> product) {
+  Provider.of<CartProvider>(
+    context,
+    listen: false,
+  ).addToCart(product);
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          '${product['name']} added to cart',
-          style: GoogleFonts.plusJakartaSans(fontSize: 13),
-        ),
-        duration: const Duration(seconds: 1),
-        backgroundColor: const Color(0xFF2E7D32),
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(
+      content: Text(
+        '${product['name']} added to cart',
+        style: GoogleFonts.plusJakartaSans(fontSize: 13),
       ),
-    );
-  }
+      duration: const Duration(seconds: 1),
+      backgroundColor: const Color(0xFF2E7D32),
+      behavior: SnackBarBehavior.floating,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10),
+      ),
+      margin: const EdgeInsets.fromLTRB(
+        16,
+        0,
+        16,
+        16,
+      ),
+    ),
+  );
+}
+    void _increaseQuantity(
+  Map<String, dynamic> product,
+) {
+  Provider.of<CartProvider>(
+    context,
+    listen: false,
+  ).increaseQuantity(product);
+}
 
-  void _increaseQuantity(Map<String, dynamic> product) {
-    setState(() {
-      final index = _cart.indexWhere((item) => item['id'] == product['id']);
-      if (index != -1) {
-        _cart[index]['quantity'] += 1;
-      } else {
-        _cart.add({
-          'id': product['id'],
-          'name': product['name'],
-          'price': product['price'],
-          'quantity': 1,
-        });
-      }
-    });
-  }
-
-  void _decreaseQuantity(Map<String, dynamic> product) {
-    setState(() {
-      final index = _cart.indexWhere((item) => item['id'] == product['id']);
-      if (index != -1) {
-        if (_cart[index]['quantity'] > 1) {
-          _cart[index]['quantity'] -= 1;
-        } else {
-          _cart.removeAt(index);
-        }
-      }
-    });
-  }
+  void _decreaseQuantity(
+  Map<String, dynamic> product,
+) {
+  Provider.of<CartProvider>(
+    context,
+    listen: false,
+  ).decreaseQuantity(product);
+}
 
   int _getQuantity(dynamic productId) {
-    final index = _cart.indexWhere((item) => item['id'] == productId);
-    if (index != -1) return _cart[index]['quantity'] as int;
-    return 0;
-  }
+  return Provider.of<CartProvider>(
+    context,
+    listen: false,
+  ).getQuantity(productId);
+}
 
   void _toggleFavourite(dynamic productId) {
     setState(() {
@@ -137,10 +126,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
     });
   }
 
-  int get _cartCount {
-    return _cart.fold(0, (sum, item) => sum + (item['quantity'] as int));
-  }
-
+  
   String _formatPrice(dynamic price) {
     final number = double.tryParse(price.toString()) ?? 0;
     final formatted = number.toStringAsFixed(0);
@@ -433,6 +419,8 @@ class _ProductsScreenState extends State<ProductsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final cartProvider = Provider.of<CartProvider>(context);
+
     return Scaffold(
       backgroundColor: const Color(0xFFF5F5F5),
       appBar: AppBar(
@@ -452,18 +440,18 @@ class _ProductsScreenState extends State<ProductsScreen> {
             children: [
               IconButton(
                 icon: const Icon(Icons.shopping_cart_outlined),
-                onPressed: _cart.isEmpty
+                onPressed: cartProvider.cart.isEmpty
                     ? null
                     : () {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => CheckoutScreen(cart: _cart),
+                            builder: (context) => CheckoutScreen(cart: cartProvider.cart),
                           ),
                         );
                       },
               ),
-              if (_cartCount > 0)
+              if (cartProvider.totalItems > 0)
                 Positioned(
                   top: 8,
                   right: 8,
@@ -474,7 +462,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
                       shape: BoxShape.circle,
                     ),
                     child: Text(
-                      '$_cartCount',
+                      '${cartProvider.totalItems}',
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 10,

@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
 
 class CartProvider extends ChangeNotifier {
-
   final List<Map<String, dynamic>> _cart = [];
 
   List<Map<String, dynamic>> get cart => _cart;
 
   int get cartCount {
-    return _cart.fold(0, (sum, item) => sum + (item['quantity'] as int));
+    return _cart.fold(
+      0,
+      (sum, item) => sum + (item['quantity'] as int),
+    );
   }
+
+  int get totalItems => _cart.length;
 
   double get totalAmount {
     return _cart.fold(0, (sum, item) {
@@ -18,13 +22,22 @@ class CartProvider extends ChangeNotifier {
   }
 
   int getQuantity(dynamic productId) {
-    final index = _cart.indexWhere((item) => item['id'] == productId);
-    if (index != -1) return _cart[index]['quantity'] as int;
+    final index = _cart.indexWhere(
+      (item) => item['id'] == productId,
+    );
+
+    if (index != -1) {
+      return _cart[index]['quantity'] as int;
+    }
+
     return 0;
   }
 
   void addToCart(Map<String, dynamic> product) {
-    final index = _cart.indexWhere((item) => item['id'] == product['id']);
+    final index = _cart.indexWhere(
+      (item) => item['id'] == product['id'],
+    );
+
     if (index != -1) {
       _cart[index]['quantity'] += 1;
     } else {
@@ -35,11 +48,15 @@ class CartProvider extends ChangeNotifier {
         'quantity': 1,
       });
     }
+
     notifyListeners();
   }
 
   void increaseQuantity(Map<String, dynamic> product) {
-    final index = _cart.indexWhere((item) => item['id'] == product['id']);
+    final index = _cart.indexWhere(
+      (item) => item['id'] == product['id'],
+    );
+
     if (index != -1) {
       _cart[index]['quantity'] += 1;
     } else {
@@ -50,11 +67,15 @@ class CartProvider extends ChangeNotifier {
         'quantity': 1,
       });
     }
+
     notifyListeners();
   }
 
   void decreaseQuantity(Map<String, dynamic> product) {
-    final index = _cart.indexWhere((item) => item['id'] == product['id']);
+    final index = _cart.indexWhere(
+      (item) => item['id'] == product['id'],
+    );
+
     if (index != -1) {
       if (_cart[index]['quantity'] > 1) {
         _cart[index]['quantity'] -= 1;
@@ -62,7 +83,23 @@ class CartProvider extends ChangeNotifier {
         _cart.removeAt(index);
       }
     }
-    notifyListeners(); 
+
+    notifyListeners();
+  }
+
+  
+  void removeFromCart(dynamic productId) {
+    _cart.removeWhere(
+      (item) => item['id'] == productId,
+    );
+
+    notifyListeners();
+  }
+
+  bool isInCart(dynamic productId) {
+    return _cart.any(
+      (item) => item['id'] == productId,
+    );
   }
 
   void clearCart() {
