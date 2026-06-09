@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
+
+import 'providers/cart_provider.dart';
 import 'screens/splash_screen.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
+
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
@@ -13,11 +17,18 @@ void main() {
       systemNavigationBarIconBrightness: Brightness.dark,
     ),
   );
+
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]);
-  runApp(const NutriBlendApp());
+
+  runApp(
+    ChangeNotifierProvider(
+      create: (_) => CartProvider(),
+      child: const NutriBlendApp(),
+    ),
+  );
 }
 
 class NutriBlendApp extends StatelessWidget {
