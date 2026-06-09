@@ -6,7 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'register_screen.dart';
-import 'products_screen.dart';
+import 'main_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -100,7 +100,7 @@ class _LoginScreenState extends State<LoginScreen>
         _showBar('Welcome back!', error: false);
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (_) => const ProductsScreen()),
+          MaterialPageRoute(builder: (_) => const MainScreen()),
         );
       } else {
         final message =
@@ -504,7 +504,7 @@ class _LoginScreenState extends State<LoginScreen>
 // import 'package:http/http.dart' as http;
 // import 'package:shared_preferences/shared_preferences.dart';
 // import 'register_screen.dart';
-// import 'products_screen.dart';
+// import 'main_screen.dart';
 
 // class LoginScreen extends StatefulWidget {
 //   const LoginScreen({super.key});
@@ -598,7 +598,7 @@ class _LoginScreenState extends State<LoginScreen>
 //         _showBar('Welcome back!', error: false);
 //         Navigator.pushReplacement(
 //           context,
-//           MaterialPageRoute(builder: (_) => const ProductsScreen()),
+//           MaterialPageRoute(builder: (_) => const MainScreen()),
 //         );
 //       } else {
 //         final message =
