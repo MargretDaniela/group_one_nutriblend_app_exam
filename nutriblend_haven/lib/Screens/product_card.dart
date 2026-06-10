@@ -1,3 +1,4 @@
+// product_card.dart
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
@@ -62,7 +63,6 @@ class _ProductCardState extends State<ProductCard> {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Image with wishlist button
               ClipRRect(
                 borderRadius: const BorderRadius.vertical(
                   top: Radius.circular(18),
@@ -89,7 +89,6 @@ class _ProductCardState extends State<ProductCard> {
                               size: 36,
                             ),
                     ),
-                    // Wishlist button
                     Positioned(
                       top: 8,
                       right: 8,
@@ -104,7 +103,7 @@ class _ProductCardState extends State<ProductCard> {
                                 isNowInWishlist
                                     ? 'Added to wishlist'
                                     : 'Removed from wishlist',
-                                style: GoogleFonts.plusJakartaSans(
+                                style: GoogleFonts.inter(
                                   fontSize: 13,
                                 ),
                               ),
@@ -146,7 +145,6 @@ class _ProductCardState extends State<ProductCard> {
                         ),
                       ),
                     ),
-                    // Out of stock overlay
                     if (!_inStock)
                       Positioned.fill(
                         child: Container(
@@ -154,7 +152,7 @@ class _ProductCardState extends State<ProductCard> {
                           child: Center(
                             child: Text(
                               'OUT OF STOCK',
-                              style: GoogleFonts.plusJakartaSans(
+                              style: GoogleFonts.inter(
                                 color: Colors.white,
                                 fontWeight: FontWeight.w800,
                                 fontSize: 12,
@@ -166,7 +164,6 @@ class _ProductCardState extends State<ProductCard> {
                   ],
                 ),
               ),
-              // Content
               Padding(
                 padding: EdgeInsets.fromLTRB(
                   widget.isFeatured ? 10 : 11,
@@ -182,7 +179,7 @@ class _ProductCardState extends State<ProductCard> {
                       _name,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: GoogleFonts.plusJakartaSans(
+                      style: GoogleFonts.inter(
                         fontSize: widget.isFeatured ? 12 : 12,
                         fontWeight: FontWeight.w700,
                         color: AppTheme.textPrimary,
@@ -193,7 +190,7 @@ class _ProductCardState extends State<ProductCard> {
                     if (!widget.isFeatured) ...[
                       Text(
                         _inStock ? '● In Stock' : '● Out of Stock',
-                        style: GoogleFonts.plusJakartaSans(
+                        style: GoogleFonts.inter(
                           fontSize: 10,
                           fontWeight: FontWeight.w600,
                           color: _inStock ? Colors.green : Colors.redAccent,
@@ -207,7 +204,7 @@ class _ProductCardState extends State<ProductCard> {
                           child: Text(
                             _price,
                             overflow: TextOverflow.ellipsis,
-                            style: GoogleFonts.plusJakartaSans(
+                            style: GoogleFonts.inter(
                               color: AppTheme.primaryColor,
                               fontSize: widget.isFeatured ? 12 : 13,
                               fontWeight: FontWeight.w900,
@@ -231,7 +228,7 @@ class _ProductCardState extends State<ProductCard> {
                                         SnackBar(
                                           content: Text(
                                             'Added to cart',
-                                            style: GoogleFonts.plusJakartaSans(
+                                            style: GoogleFonts.inter(
                                               fontSize: 13,
                                             ),
                                           ),

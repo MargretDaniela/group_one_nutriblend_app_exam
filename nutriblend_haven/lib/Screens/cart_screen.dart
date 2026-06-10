@@ -17,22 +17,23 @@ class CartScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppTheme.scaffold,
       appBar: AppBar(
-        backgroundColor: AppTheme.primaryColor,
-        foregroundColor: Colors.white,
+        backgroundColor: Colors.white,
+        foregroundColor: const Color(0xFF0D1F14),
         elevation: 0,
+        surfaceTintColor: Colors.transparent,
         title: Text(
           cart.cart.isEmpty ? 'Cart' : 'Cart (${cart.cartCount})',
-          style: GoogleFonts.playfairDisplay(
-              fontSize: 20, fontWeight: FontWeight.w700, color: Colors.white),
+          style: GoogleFonts.dmSerifDisplay(
+              fontSize: 20, color: const Color(0xFF0D1F14)),
         ),
         actions: [
           if (cart.cart.isNotEmpty)
             TextButton(
               onPressed: () => _confirmClear(context, cart),
               child: Text('Clear',
-                  style: GoogleFonts.plusJakartaSans(
+                  style: GoogleFonts.inter(
                       fontSize: 13,
-                      color: Colors.white70,
+                      color: const Color(0xFF6B7B70),
                       fontWeight: FontWeight.w500)),
             ),
         ],
@@ -64,16 +65,16 @@ class CartScreen extends StatelessWidget {
         shape:
             RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Text('Clear Cart',
-            style: GoogleFonts.plusJakartaSans(
+            style: GoogleFonts.inter(
                 fontWeight: FontWeight.w700, fontSize: 17)),
         content: Text('Remove all items from your cart?',
-            style: GoogleFonts.plusJakartaSans(
+            style: GoogleFonts.inter(
                 fontSize: 14, color: AppTheme.textSecondary)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: Text('Cancel',
-                style: GoogleFonts.plusJakartaSans(
+                style: GoogleFonts.inter(
                     color: AppTheme.textSecondary,
                     fontWeight: FontWeight.w600)),
           ),
@@ -83,7 +84,7 @@ class CartScreen extends StatelessWidget {
               Navigator.pop(context);
             },
             child: Text('Clear',
-                style: GoogleFonts.plusJakartaSans(
+                style: GoogleFonts.inter(
                     color: Colors.red, fontWeight: FontWeight.w600)),
           ),
         ],
@@ -118,13 +119,13 @@ class _EmptyCart extends StatelessWidget {
             ),
             const SizedBox(height: 20),
             Text('Your cart is empty',
-                style: GoogleFonts.playfairDisplay(
+                style: GoogleFonts.dmSerifDisplay(
                     fontSize: 22,
                     fontWeight: FontWeight.w700,
                     color: AppTheme.textPrimary)),
             const SizedBox(height: 8),
             Text('Add products to begin your order',
-                style: GoogleFonts.plusJakartaSans(
+                style: GoogleFonts.inter(
                     fontSize: 14, color: AppTheme.textSecondary),
                 textAlign: TextAlign.center),
             const SizedBox(height: 28),
@@ -132,7 +133,7 @@ class _EmptyCart extends StatelessWidget {
               onPressed: onBrowse,
               icon: const Icon(Icons.storefront_outlined, size: 18),
               label: Text('Browse Products',
-                  style: GoogleFonts.plusJakartaSans(
+                  style: GoogleFonts.inter(
                       fontSize: 14, fontWeight: FontWeight.w600)),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppTheme.primaryColor,
@@ -184,10 +185,10 @@ class _CartItem extends StatelessWidget {
               width: 60,
               height: 60,
               decoration: BoxDecoration(
-                  color: const Color(0xFFE8F5E9),
+                  color: const Color(0xFFF7F8F7),
                   borderRadius: BorderRadius.circular(12)),
               child: const Icon(Icons.local_pharmacy_outlined,
-                  color: Color(0xFF4CAF50), size: 28),
+                  color: Color(0xFF00C260), size: 28),
             ),
             const SizedBox(width: 14),
             Expanded(
@@ -199,7 +200,7 @@ class _CartItem extends StatelessWidget {
                     children: [
                       Expanded(
                         child: Text(item['name'],
-                            style: GoogleFonts.plusJakartaSans(
+                            style: GoogleFonts.inter(
                                 fontSize: 13,
                                 fontWeight: FontWeight.w600,
                                 color: AppTheme.textPrimary),
@@ -218,7 +219,7 @@ class _CartItem extends StatelessWidget {
                   ),
                   const SizedBox(height: 6),
                   Text(AppConstants.formatPrice(price),
-                      style: GoogleFonts.plusJakartaSans(
+                      style: GoogleFonts.inter(
                           fontSize: 12, color: AppTheme.textSecondary)),
                   const SizedBox(height: 10),
                   Row(
@@ -226,7 +227,7 @@ class _CartItem extends StatelessWidget {
                     children: [
                       _QtyControl(item: item, cart: cart),
                       Text(AppConstants.formatPrice(lineTotal),
-                          style: GoogleFonts.plusJakartaSans(
+                          style: GoogleFonts.inter(
                               fontSize: 13,
                               fontWeight: FontWeight.w700,
                               color: AppTheme.primaryColor)),
@@ -278,7 +279,7 @@ class _QtyControl extends StatelessWidget {
             height: 30,
             child: Center(
               child: Text('$qty',
-                  style: GoogleFonts.plusJakartaSans(
+                  style: GoogleFonts.inter(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
                       color: AppTheme.textPrimary)),
@@ -363,7 +364,7 @@ class _OrderSummary extends StatelessWidget {
                     borderRadius: BorderRadius.circular(13)),
               ),
               child: Text('Proceed to Checkout',
-                  style: GoogleFonts.plusJakartaSans(
+                  style: GoogleFonts.inter(
                       fontSize: 15, fontWeight: FontWeight.w600)),
             ),
           ),
@@ -388,7 +389,7 @@ class _Row extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(label,
-            style: GoogleFonts.plusJakartaSans(
+            style: GoogleFonts.inter(
                 fontSize: isBold ? 15 : 13,
                 fontWeight:
                     isBold ? FontWeight.w700 : FontWeight.w400,
@@ -396,7 +397,7 @@ class _Row extends StatelessWidget {
                     ? AppTheme.textPrimary
                     : AppTheme.textSecondary)),
         Text(value,
-            style: GoogleFonts.plusJakartaSans(
+            style: GoogleFonts.inter(
                 fontSize: isBold ? 16 : 13,
                 fontWeight:
                     isBold ? FontWeight.w700 : FontWeight.w500,

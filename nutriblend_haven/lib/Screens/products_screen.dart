@@ -133,12 +133,12 @@ class _ProductsScreenState extends State<ProductsScreen> {
                       children: [
                         Text(
                           _isLoading ? 'Loading…' : '${_products.length} products',
-                          style: GoogleFonts.plusJakartaSans(
+                          style: GoogleFonts.inter(
                               fontSize: 12, color: AppTheme.textSecondary),
                         ),
                         if (_lastPage > 1 && !_isLoading)
                           Text('Page $_currentPage of $_lastPage',
-                              style: GoogleFonts.plusJakartaSans(
+                              style: GoogleFonts.inter(
                                   fontSize: 12, color: AppTheme.textSecondary)),
                       ],
                     ),
@@ -179,7 +179,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
           ),
           const SizedBox(width: 10),
           Text('Shop',
-              style: GoogleFonts.playfairDisplay(
+              style: GoogleFonts.dmSerifDisplay(
                   fontSize: 20,
                   fontWeight: FontWeight.w800,
                   color: AppTheme.primaryDark)),
@@ -198,7 +198,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
                   width: 36,
                   height: 36,
                   decoration: BoxDecoration(
-                    color: const Color(0xFFF1F8E9),
+                    color: const Color(0xFFF7F8F7),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: const Icon(
@@ -232,25 +232,6 @@ class _ProductsScreenState extends State<ProductsScreen> {
                   ),
                 ),
             ],
-          ),
-        ),
-        IconButton(
-          onPressed: () {
-            _loadCategories();
-            _loadPage(1);
-          },
-          icon: Container(
-            width: 36,
-            height: 36,
-            decoration: BoxDecoration(
-              color: const Color(0xFFF1F8E9),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: const Icon(
-              Icons.refresh_rounded,
-              color: AppTheme.primaryColor,
-              size: 20,
-            ),
           ),
         ),
         const SizedBox(width: 8),
@@ -301,7 +282,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
                       : [],
                 ),
                 child: Text(cat['name'] as String,
-                    style: GoogleFonts.plusJakartaSans(
+                    style: GoogleFonts.inter(
                       color: sel ? Colors.white : AppTheme.textPrimary,
                       fontWeight: sel ? FontWeight.w700 : FontWeight.w500,
                       fontSize: 13,
@@ -482,7 +463,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Text('$_currentPage / $_lastPage',
-                style: GoogleFonts.plusJakartaSans(
+                style: GoogleFonts.inter(
                     fontWeight: FontWeight.w700,
                     fontSize: 14,
                     color: AppTheme.textPrimary)),

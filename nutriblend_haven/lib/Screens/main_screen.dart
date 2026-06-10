@@ -174,7 +174,7 @@ class _NavItem extends StatelessWidget {
             const SizedBox(height: 3),
             Text(
               label,
-              style: GoogleFonts.plusJakartaSans(
+              style: GoogleFonts.inter(
                 fontSize: 10,
                 fontWeight:
                     isActive ? FontWeight.w700 : FontWeight.w400,
@@ -272,7 +272,7 @@ class _BadgeNavItem extends StatelessWidget {
             const SizedBox(height: 3),
             Text(
               label,
-              style: GoogleFonts.plusJakartaSans(
+              style: GoogleFonts.inter(
                 fontSize: 10,
                 fontWeight:
                     isActive ? FontWeight.w700 : FontWeight.w400,

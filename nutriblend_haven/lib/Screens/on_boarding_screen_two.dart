@@ -73,7 +73,7 @@ class _OnboardingScreenTwoState extends State<OnboardingScreenTwo>
     final double width = MediaQuery.of(context).size.width;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF1F8E9),
+      backgroundColor: const Color(0xFFF7F8F7),
       body: SafeArea(
         child: Column(
           children: [
@@ -130,7 +130,7 @@ class _OnboardingScreenTwoState extends State<OnboardingScreenTwo>
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
           decoration: BoxDecoration(
-            color: const Color(0xFF2E7D32).withOpacity(0.11),
+            color: const Color(0xFF00A651).withOpacity(0.11),
             borderRadius: BorderRadius.circular(6),
           ),
           child: Text(
@@ -138,7 +138,7 @@ class _OnboardingScreenTwoState extends State<OnboardingScreenTwo>
             style: GoogleFonts.plusJakartaSans(
               fontSize: 10,
               fontWeight: FontWeight.w700,
-              color: const Color(0xFF2E7D32),
+              color: const Color(0xFF00A651),
               letterSpacing: 1.8,
             ),
           ),
@@ -193,11 +193,11 @@ class _OnboardingScreenTwoState extends State<OnboardingScreenTwo>
                   width: 56,
                   height: 56,
                   decoration: BoxDecoration(
-                    color: const Color(0xFF2E7D32),
+                    color: const Color(0xFF00A651),
                     borderRadius: BorderRadius.circular(18),
                     boxShadow: [
                       BoxShadow(
-                        color: const Color(0xFF2E7D32).withOpacity(0.35),
+                        color: const Color(0xFF00A651).withOpacity(0.35),
                         blurRadius: 16,
                         offset: const Offset(0, 6),
                       ),
@@ -252,14 +252,14 @@ class _Illustration extends StatelessWidget {
               height: width * 0.54,
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
-                  colors: [Color(0xFF66BB6A), Color(0xFF2E7D32)],
+                  colors: [Color(0xFF4DC97E), Color(0xFF00A651)],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF2E7D32).withOpacity(0.28),
+                    color: const Color(0xFF00A651).withOpacity(0.28),
                     blurRadius: 26,
                     offset: const Offset(0, 10),
                   ),
@@ -285,7 +285,7 @@ class _DeliveryPainter extends CustomPainter {
       ..style = PaintingStyle.fill;
 
     final linePaint = Paint()
-      ..color = const Color(0xFF2E7D32).withOpacity(0.45)
+      ..color = const Color(0xFF00A651).withOpacity(0.45)
       ..strokeWidth = size.width * 0.028
       ..strokeCap = StrokeCap.round
       ..style = PaintingStyle.stroke;
@@ -347,8 +347,8 @@ class _Dots extends StatelessWidget {
           height: 7,
           decoration: BoxDecoration(
             color: active
-                ? const Color(0xFF2E7D32)
-                : const Color(0xFF2E7D32).withOpacity(0.25),
+                ? const Color(0xFF00A651)
+                : const Color(0xFF00A651).withOpacity(0.25),
             borderRadius: BorderRadius.circular(4),
           ),
         );
@@ -367,7 +367,7 @@ class _LogoLockup extends StatelessWidget {
           height: 34,
           decoration: BoxDecoration(
             gradient: const LinearGradient(
-              colors: [Color(0xFF81C784), Color(0xFF2E7D32)],
+              colors: [Color(0xFF4DC97E), Color(0xFF00A651)],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
@@ -381,7 +381,7 @@ class _LogoLockup extends StatelessWidget {
           style: GoogleFonts.playfairDisplay(
             fontSize: 16,
             fontWeight: FontWeight.w700,
-            color: const Color(0xFF1B5E20),
+            color: const Color(0xFF007A3D),
           ),
         ),
       ],

@@ -69,7 +69,7 @@ class _OnboardingScreenOneState extends State<OnboardingScreenOne>
     final double width = MediaQuery.of(context).size.width;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFE8F5E9),
+      backgroundColor: const Color(0xFFF7F8F7),
       body: SafeArea(
         child: Column(
           children: [
@@ -126,7 +126,7 @@ class _OnboardingScreenOneState extends State<OnboardingScreenOne>
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
           decoration: BoxDecoration(
-            color: const Color(0xFF43A047).withOpacity(0.12),
+            color: const Color(0xFF00A651).withOpacity(0.12),
             borderRadius: BorderRadius.circular(6),
           ),
           child: Text(
@@ -134,7 +134,7 @@ class _OnboardingScreenOneState extends State<OnboardingScreenOne>
             style: GoogleFonts.plusJakartaSans(
               fontSize: 10,
               fontWeight: FontWeight.w700,
-              color: const Color(0xFF43A047),
+              color: const Color(0xFF00A651),
               letterSpacing: 1.8,
             ),
           ),
@@ -178,11 +178,11 @@ class _OnboardingScreenOneState extends State<OnboardingScreenOne>
                   width: 56,
                   height: 56,
                   decoration: BoxDecoration(
-                    color: const Color(0xFF43A047),
+                    color: const Color(0xFF00A651),
                     borderRadius: BorderRadius.circular(18),
                     boxShadow: [
                       BoxShadow(
-                        color: const Color(0xFF43A047).withOpacity(0.35),
+                        color: const Color(0xFF00A651).withOpacity(0.35),
                         blurRadius: 16,
                         offset: const Offset(0, 6),
                       ),
@@ -237,14 +237,14 @@ class _Illustration extends StatelessWidget {
               height: width * 0.54,
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
-                  colors: [Color(0xFF81C784), Color(0xFF388E3C)],
+                  colors: [Color(0xFF4DC97E), Color(0xFF00A651)],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF43A047).withOpacity(0.28),
+                    color: const Color(0xFF00A651).withOpacity(0.28),
                     blurRadius: 26,
                     offset: const Offset(0, 10),
                   ),
@@ -327,8 +327,8 @@ class _Dots extends StatelessWidget {
           height: 7,
           decoration: BoxDecoration(
             color: active
-                ? const Color(0xFF43A047)
-                : const Color(0xFF43A047).withOpacity(0.25),
+                ? const Color(0xFF00A651)
+                : const Color(0xFF00A651).withOpacity(0.25),
             borderRadius: BorderRadius.circular(4),
           ),
         );
@@ -347,7 +347,7 @@ class _LogoLockup extends StatelessWidget {
           height: 34,
           decoration: BoxDecoration(
             gradient: const LinearGradient(
-              colors: [Color(0xFF81C784), Color(0xFF2E7D32)],
+              colors: [Color(0xFF4DC97E), Color(0xFF00A651)],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
@@ -361,7 +361,7 @@ class _LogoLockup extends StatelessWidget {
           style: GoogleFonts.playfairDisplay(
             fontSize: 16,
             fontWeight: FontWeight.w700,
-            color: const Color(0xFF1B5E20),
+            color: const Color(0xFF007A3D),
           ),
         ),
       ],
