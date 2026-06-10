@@ -1,109 +1,79 @@
 import 'package:flutter/material.dart';
 
+class CartItem {
+  final int id;
+  final String name;
+  final double price;
+  int quantity;
+
+  CartItem({
+    required this.id,
+    required this.name,
+    required this.price,
+    this.quantity = 1,
+  });
+
+  double get lineTotal => price * quantity;
+}
+
 class CartProvider extends ChangeNotifier {
-  final List<Map<String, dynamic>> _cart = [];
+  final List<CartItem> _items = [];
 
-  List<Map<String, dynamic>> get cart => _cart;
+  List<CartItem> get items => List.unmodifiable(_items);
 
-  int get cartCount {
-    return _cart.fold(
-      0,
-      (sum, item) => sum + (item['quantity'] as int),
-    );
+  // Legacy getter for screens that still use Map<String, dynamic>
+  List<Map<String, dynamic>> get cart => _items
+      .map((i) => {'id': i.id, 'name': i.name, 'price': i.price, 'quantity': i.quantity})
+      .toList();
+
+  int get cartCount => _items.fold(0, (sum, i) => sum + i.quantity);
+  int get totalItems => _items.length;
+
+  double get totalAmount => _items.fold(0, (sum, i) => sum + i.lineTotal);
+
+  int getQuantity(int productId) {
+    final idx = _items.indexWhere((i) => i.id == productId);
+    return idx != -1 ? _items[idx].quantity : 0;
   }
 
-  int get totalItems => _cart.length;
-
-  double get totalAmount {
-    return _cart.fold(0, (sum, item) {
-      final price = double.tryParse(item['price'].toString()) ?? 0;
-      return sum + (price * (item['quantity'] as int));
-    });
-  }
-
-  int getQuantity(dynamic productId) {
-    final index = _cart.indexWhere(
-      (item) => item['id'] == productId,
-    );
-
-    if (index != -1) {
-      return _cart[index]['quantity'] as int;
-    }
-
-    return 0;
-  }
+  bool isInCart(int productId) => _items.any((i) => i.id == productId);
 
   void addToCart(Map<String, dynamic> product) {
-    final index = _cart.indexWhere(
-      (item) => item['id'] == product['id'],
-    );
-
-    if (index != -1) {
-      _cart[index]['quantity'] += 1;
+    final id = product['id'] as int;
+    final idx = _items.indexWhere((i) => i.id == id);
+    if (idx != -1) {
+      _items[idx].quantity += 1;
     } else {
-      _cart.add({
-        'id': product['id'],
-        'name': product['name'],
-        'price': product['price'],
-        'quantity': 1,
-      });
+      _items.add(CartItem(
+        id: id,
+        name: product['name'] as String,
+        price: double.tryParse(product['price']?.toString() ?? '0') ?? 0,
+      ));
     }
-
     notifyListeners();
   }
 
-  void increaseQuantity(Map<String, dynamic> product) {
-    final index = _cart.indexWhere(
-      (item) => item['id'] == product['id'],
-    );
-
-    if (index != -1) {
-      _cart[index]['quantity'] += 1;
-    } else {
-      _cart.add({
-        'id': product['id'],
-        'name': product['name'],
-        'price': product['price'],
-        'quantity': 1,
-      });
-    }
-
-    notifyListeners();
-  }
+  void increaseQuantity(Map<String, dynamic> product) => addToCart(product);
 
   void decreaseQuantity(Map<String, dynamic> product) {
-    final index = _cart.indexWhere(
-      (item) => item['id'] == product['id'],
-    );
-
-    if (index != -1) {
-      if (_cart[index]['quantity'] > 1) {
-        _cart[index]['quantity'] -= 1;
-      } else {
-        _cart.removeAt(index);
-      }
+    final id = product['id'] as int;
+    final idx = _items.indexWhere((i) => i.id == id);
+    if (idx == -1) return;
+    if (_items[idx].quantity > 1) {
+      _items[idx].quantity -= 1;
+    } else {
+      _items.removeAt(idx);
     }
-
     notifyListeners();
   }
 
-  
-  void removeFromCart(dynamic productId) {
-    _cart.removeWhere(
-      (item) => item['id'] == productId,
-    );
-
+  void removeFromCart(int productId) {
+    _items.removeWhere((i) => i.id == productId);
     notifyListeners();
-  }
-
-  bool isInCart(dynamic productId) {
-    return _cart.any(
-      (item) => item['id'] == productId,
-    );
   }
 
   void clearCart() {
-    _cart.clear();
+    _items.clear();
     notifyListeners();
   }
 }

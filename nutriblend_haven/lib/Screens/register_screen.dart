@@ -2,6 +2,7 @@
 
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import '../utils/constants.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'login_screen.dart';
@@ -29,8 +30,7 @@ class _RegisterScreenState extends State<RegisterScreen>
   late Animation<double> _fadeAnim;
   late Animation<Offset> _slideAnim;
 
-  static const String _baseUrl =
-      'https://testing.rasmuspharmaceuticals.com/api/v1';
+  static String get _baseUrl => AppConstants.authApiUrl;
 
   @override
   void initState() {
