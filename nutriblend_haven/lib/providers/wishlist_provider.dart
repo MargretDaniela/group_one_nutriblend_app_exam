@@ -7,7 +7,7 @@ class WishlistProvider extends ChangeNotifier {
 
   int get count => _wishlist.length;
 
-  bool isLoved(dynamic productId) {
+  bool isInWishlist(dynamic productId) {
     return _wishlist.any((item) => item['id'] == productId);
   }
 
