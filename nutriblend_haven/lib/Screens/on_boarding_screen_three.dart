@@ -345,18 +345,14 @@ class _LogoLockup extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Container(
-          width: 34,
-          height: 34,
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [Color(0xFF4DC97E), Color(0xFF00A651)],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            borderRadius: BorderRadius.circular(10),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(10),
+          child: Image.asset(
+            'assets/logo.png',
+            width: 34,
+            height: 34,
+            fit: BoxFit.cover,
           ),
-          child: const Icon(Icons.eco_rounded, color: Colors.white, size: 18),
         ),
         const SizedBox(width: 8),
         Text(

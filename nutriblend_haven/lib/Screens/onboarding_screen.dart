@@ -120,71 +120,66 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   @override
   Widget build(BuildContext context) {
     final page = _pages[_currentPage];
-    final isDark = page.bgColor.computeLuminance() < 0.3;
-    final textColor = isDark ? Colors.white : const Color(0xFF0D1F14);
-    final subColor = isDark
-        ? Colors.white.withOpacity(0.65)
-        : const Color(0xFF6B7B70);
-    final tagColor = page.bgColor == const Color(0xFFF7F8F7)
-        ? const Color(0xFF00A651)
-        : (isDark ? Colors.white.withOpacity(0.80) : const Color(0xFF007A3D));
 
     return Scaffold(
       backgroundColor: page.bgColor,
       body: Column(
         children: [
-          // Top half — illustration area
+          // Top half — illustration area with PageView
           Expanded(
             flex: 5,
-            child: Stack(
-              children: [
-                // Large background shape
-                Positioned.fill(
-                  child: CustomPaint(
-                    painter: _BlobPainter(
-                      color: page.shapeColor.withOpacity(isDark ? 0.40 : 0.12),
+            child: PageView.builder(
+              controller: _pageController,
+              onPageChanged: _onPageChanged,
+              itemCount: _pages.length,
+              itemBuilder: (context, index) {
+                final p = _pages[index];
+                final dark = p.bgColor.computeLuminance() < 0.3;
+                return Stack(
+                  children: [
+                    // Large background shape
+                    Positioned.fill(
+                      child: CustomPaint(
+                        painter: _BlobPainter(
+                          color: p.shapeColor.withOpacity(dark ? 0.40 : 0.12),
+                        ),
+                      ),
                     ),
-                  ),
-                ),
-                // Center icon illustration
-                Center(
-                  child: AnimatedBuilder(
-                    animation: _entryController,
-                    builder: (_, __) => FadeTransition(
-                      opacity: _entryFade,
+                    // Center icon illustration
+                    Center(
                       child: _IllustrationBubble(
-                        icon: page.icon,
-                        bgColor: page.shapeColor,
-                        isDark: isDark,
+                        icon: p.icon,
+                        bgColor: p.shapeColor,
+                        isDark: dark,
                       ),
                     ),
-                  ),
-                ),
-                // Skip button top-right
-                SafeArea(
-                  child: Align(
-                    alignment: Alignment.topRight,
-                    child: Padding(
-                      padding: const EdgeInsets.only(right: 16, top: 8),
-                      child: TextButton(
-                        onPressed: _goToLogin,
-                        style: TextButton.styleFrom(
-                          foregroundColor: isDark
-                              ? Colors.white.withOpacity(0.65)
-                              : const Color(0xFF6B7B70),
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 14, vertical: 8),
-                        ),
-                        child: Text(
-                          'Skip',
-                          style: GoogleFonts.inter(
-                              fontSize: 13, fontWeight: FontWeight.w500),
+                    // Skip button top-right
+                    SafeArea(
+                      child: Align(
+                        alignment: Alignment.topRight,
+                        child: Padding(
+                          padding: const EdgeInsets.only(right: 16, top: 8),
+                          child: TextButton(
+                            onPressed: _goToLogin,
+                            style: TextButton.styleFrom(
+                              foregroundColor: dark
+                                  ? Colors.white.withOpacity(0.65)
+                                  : const Color(0xFF6B7B70),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 14, vertical: 8),
+                            ),
+                            child: Text(
+                              'Skip',
+                              style: GoogleFonts.inter(
+                                  fontSize: 13, fontWeight: FontWeight.w500),
+                            ),
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ),
-              ],
+                  ],
+                );
+              },
             ),
           ),
           // Bottom panel — white card
@@ -210,64 +205,73 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Tagline
-                    FadeTransition(
-                      opacity: _entryFade,
-                      child: SlideTransition(
-                        position: _entrySlide,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 10, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF00A651).withOpacity(0.10),
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          child: Text(
-                            page.tagline,
-                            style: GoogleFonts.inter(
-                              fontSize: 10,
-                              fontWeight: FontWeight.w700,
-                              color: const Color(0xFF00A651),
-                              letterSpacing: 1.8,
+                    // Scrollable text content
+                    Expanded(
+                      child: SingleChildScrollView(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Tagline
+                            FadeTransition(
+                              opacity: _entryFade,
+                              child: SlideTransition(
+                                position: _entrySlide,
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 10, vertical: 4),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFF00A651).withOpacity(0.10),
+                                    borderRadius: BorderRadius.circular(6),
+                                  ),
+                                  child: Text(
+                                    page.tagline,
+                                    style: GoogleFonts.inter(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w700,
+                                      color: const Color(0xFF00A651),
+                                      letterSpacing: 1.8,
+                                    ),
+                                  ),
+                                ),
+                              ),
                             ),
-                          ),
+                            const SizedBox(height: 16),
+                            // Headline
+                            FadeTransition(
+                              opacity: _entryFade,
+                              child: SlideTransition(
+                                position: _entrySlide,
+                                child: Text(
+                                  page.headline,
+                                  style: GoogleFonts.dmSerifDisplay(
+                                    fontSize: 32,
+                                    color: const Color(0xFF0D1F14),
+                                    height: 1.15,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 14),
+                            // Body
+                            FadeTransition(
+                              opacity: _entryFade,
+                              child: SlideTransition(
+                                position: _entrySlide,
+                                child: Text(
+                                  page.body,
+                                  style: GoogleFonts.inter(
+                                    fontSize: 14,
+                                    color: const Color(0xFF6B7B70),
+                                    height: 1.65,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ),
-                    const SizedBox(height: 16),
-                    // Headline
-                    FadeTransition(
-                      opacity: _entryFade,
-                      child: SlideTransition(
-                        position: _entrySlide,
-                        child: Text(
-                          page.headline,
-                          style: GoogleFonts.dmSerifDisplay(
-                            fontSize: 32,
-                            color: const Color(0xFF0D1F14),
-                            height: 1.15,
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 14),
-                    // Body
-                    FadeTransition(
-                      opacity: _entryFade,
-                      child: SlideTransition(
-                        position: _entrySlide,
-                        child: Text(
-                          page.body,
-                          style: GoogleFonts.inter(
-                            fontSize: 14,
-                            color: const Color(0xFF6B7B70),
-                            height: 1.65,
-                          ),
-                        ),
-                      ),
-                    ),
-                    const Spacer(),
-                    // Dots + Button row
+                    // Dots + Button row (pinned at bottom)
                     Padding(
                       padding: const EdgeInsets.only(bottom: 36),
                       child: Row(
@@ -377,8 +381,21 @@ class _IllustrationBubble extends StatelessWidget {
             color: isDark ? Colors.white.withOpacity(0.18) : bgColor,
             shape: BoxShape.circle,
           ),
-          child: Icon(icon,
-              color: isDark ? Colors.white : Colors.white, size: 44),
+          child: Container(
+            width: 50,
+            height: 50,
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+            ),
+            padding: const EdgeInsets.all(4),
+            child: ClipOval(
+              child: Image.asset(
+                'assets/logo.png',
+                fit: BoxFit.cover,
+              ),
+            ),
+          ),
         ),
       ),
     );
