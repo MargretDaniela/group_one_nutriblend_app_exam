@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:shimmer/shimmer.dart';
 import '../providers/cart_provider.dart';
 import '../services/product_service.dart';
 import '../utils/theme.dart';
 import 'home_screen.dart';
+import 'product_card.dart';
 
 class ProductsScreen extends StatefulWidget {
   const ProductsScreen({super.key});
@@ -110,7 +112,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F0),
+      backgroundColor: AppTheme.backgroundColor,
       body: CustomScrollView(
         slivers: [
           _buildAppBar(),
@@ -130,7 +132,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
                           'Page $_currentPage of $_lastPage',
                           style: GoogleFonts.plusJakartaSans(
                             fontSize: 12,
-                            color: const Color(0xFF9E9E9E),
+                            color: AppTheme.textSecondary,
                           ),
                         )
                       : null,
@@ -175,7 +177,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
             style: GoogleFonts.playfairDisplay(
               fontSize: 18,
               fontWeight: FontWeight.w800,
-              color: const Color(0xFF1B5E20),
+              color: AppTheme.primaryColor,
             ),
           ),
         ],
@@ -190,7 +192,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
             width: 36,
             height: 36,
             decoration: BoxDecoration(
-              color: const Color(0xFFF1F8E9),
+              color: AppTheme.primaryLight,
               borderRadius: BorderRadius.circular(12),
             ),
             child: const Icon(
@@ -204,7 +206,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
       ],
       bottom: PreferredSize(
         preferredSize: const Size.fromHeight(0.5),
-        child: Container(height: 0.5, color: Colors.grey.shade200),
+        child: Container(height: 0.5, color: AppTheme.dividerColor),
       ),
     );
   }
@@ -217,10 +219,10 @@ class _ProductsScreenState extends State<ProductsScreen> {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: Colors.grey.shade200),
+          border: Border.all(color: AppTheme.dividerColor),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.04),
+              color: AppTheme.shadowColor,
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),
@@ -229,7 +231,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
         padding: const EdgeInsets.symmetric(horizontal: 16),
         child: Row(
           children: [
-            Icon(Icons.search_rounded, color: Colors.grey.shade400, size: 20),
+            Icon(Icons.search_rounded, color: AppTheme.textSecondary, size: 20),
             const SizedBox(width: 10),
             Expanded(
               child: TextField(
@@ -238,12 +240,12 @@ class _ProductsScreenState extends State<ProductsScreen> {
                 onSubmitted: _doSearch,
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 14,
-                  color: Colors.black87,
+                  color: AppTheme.textPrimary,
                 ),
                 decoration: InputDecoration(
                   hintText: 'Search supplements...',
                   hintStyle: GoogleFonts.plusJakartaSans(
-                    color: Colors.grey.shade400,
+                    color: AppTheme.textSecondary,
                     fontSize: 14,
                   ),
                   border: InputBorder.none,
@@ -257,8 +259,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
                   _searchController.clear();
                   _doSearch('');
                 },
-                child: Icon(Icons.close_rounded,
-                    color: Colors.grey.shade400, size: 18),
+                child: Icon(Icons.close_rounded, color: AppTheme.textSecondary, size: 18),
               ),
           ],
         ),
@@ -290,7 +291,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
                   color: sel ? AppTheme.primaryColor : Colors.white,
                   borderRadius: BorderRadius.circular(22),
                   border: Border.all(
-                    color: sel ? AppTheme.primaryColor : Colors.grey.shade200,
+                    color: sel ? AppTheme.primaryColor : AppTheme.dividerColor,
                     width: sel ? 0 : 1,
                   ),
                   boxShadow: sel
@@ -306,7 +307,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
                 child: Text(
                   cat['name'] as String,
                   style: GoogleFonts.plusJakartaSans(
-                    color: sel ? Colors.white : Colors.black87,
+                    color: sel ? Colors.white : AppTheme.textPrimary,
                     fontWeight: sel ? FontWeight.w700 : FontWeight.w500,
                     fontSize: 13,
                   ),
@@ -331,7 +332,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
             style: GoogleFonts.playfairDisplay(
               fontSize: 18,
               fontWeight: FontWeight.w800,
-              color: Colors.black87,
+              color: AppTheme.textPrimary,
             ),
           ),
           if (trailing != null) trailing,
@@ -378,13 +379,13 @@ class _ProductsScreenState extends State<ProductsScreen> {
                 width: 72,
                 height: 72,
                 decoration: BoxDecoration(
-                  color: AppTheme.primaryColor.withOpacity(0.08),
+                  color: AppTheme.primaryLight,
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
                   Icons.search_off_rounded,
                   size: 36,
-                  color: AppTheme.primaryColor.withOpacity(0.4),
+                  color: AppTheme.primaryColor,
                 ),
               ),
               const SizedBox(height: 16),
@@ -393,7 +394,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 15,
                   fontWeight: FontWeight.w600,
-                  color: Colors.black54,
+                  color: AppTheme.textSecondary,
                 ),
               ),
               if (_search.isNotEmpty || _selectedCategoryId != null) ...[
@@ -432,7 +433,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
           childAspectRatio: 0.68,
         ),
         delegate: SliverChildBuilderDelegate(
-          (_, i) => ProductGridCard(product: _products[i]),
+          (_, i) => ProductCard(product: _products[i]),
           childCount: _products.length,
         ),
       ),
@@ -456,7 +457,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
               style: GoogleFonts.plusJakartaSans(
                 fontWeight: FontWeight.w700,
                 fontSize: 14,
-                color: Colors.black87,
+                color: AppTheme.textPrimary,
               ),
             ),
           ),
@@ -479,12 +480,12 @@ class _ProductsScreenState extends State<ProductsScreen> {
         width: 44,
         height: 44,
         decoration: BoxDecoration(
-          color: active ? AppTheme.primaryColor : Colors.grey.shade200,
+          color: active ? AppTheme.primaryColor : AppTheme.dividerColor,
           borderRadius: BorderRadius.circular(14),
         ),
         child: Icon(
           icon,
-          color: active ? Colors.white : Colors.grey.shade400,
+          color: active ? Colors.white : AppTheme.textSecondary,
           size: 22,
         ),
       ),
@@ -495,10 +496,14 @@ class _ProductsScreenState extends State<ProductsScreen> {
 class _ShimmerCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.grey.shade100,
-        borderRadius: BorderRadius.circular(18),
+    return Shimmer.fromColors(
+      baseColor: AppTheme.shimmerBase,
+      highlightColor: AppTheme.shimmerHighlight,
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(18),
+        ),
       ),
     );
   }
@@ -521,11 +526,11 @@ class _ErrorView extends StatelessWidget {
               width: 72,
               height: 72,
               decoration: BoxDecoration(
-                color: Colors.grey.shade100,
+                color: AppTheme.primaryLight,
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Icon(Icons.wifi_off_rounded,
-                  size: 36, color: Colors.grey.shade400),
+                  size: 36, color: AppTheme.primaryColor),
             ),
             const SizedBox(height: 16),
             Text(
@@ -533,7 +538,7 @@ class _ErrorView extends StatelessWidget {
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 17,
                 fontWeight: FontWeight.w700,
-                color: Colors.black87,
+                color: AppTheme.textPrimary,
               ),
             ),
             const SizedBox(height: 8),
@@ -541,7 +546,7 @@ class _ErrorView extends StatelessWidget {
               message,
               textAlign: TextAlign.center,
               style: GoogleFonts.plusJakartaSans(
-                color: Colors.grey.shade500,
+                color: AppTheme.textSecondary,
                 fontSize: 13,
               ),
             ),
@@ -551,8 +556,7 @@ class _ErrorView extends StatelessWidget {
               icon: const Icon(Icons.refresh_rounded, size: 18),
               label: Text(
                 'Try Again',
-                style:
-                    GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w600),
+                style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w600),
               ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppTheme.primaryColor,

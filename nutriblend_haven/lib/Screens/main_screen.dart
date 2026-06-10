@@ -2,10 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../providers/cart_provider.dart';
+import '../providers/wishlist_provider.dart';
 import 'home_screen.dart';
 import 'products_screen.dart';
 import 'cart_screen.dart';
 import 'profile_screen.dart';
+
+class AppTheme {
+  static const Color backgroundColor = Colors.white;
+  static const Color dividerColor = Color(0xFFE0E0E0);
+  static const Color primaryColor = Color(0xFF1E88E5);
+  static const Color textSecondary = Color(0xFF757575);
+  static const Color accentColor = Color(0xFFD32F2F);
+}
 
 class MainScreen extends StatefulWidget {
   final int initialIndex;
@@ -37,18 +46,19 @@ class MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final cart = Provider.of<CartProvider>(context);
-
-    return Scaffold(
-      backgroundColor: const Color(0xFFF5F7F5),
-      body: IndexedStack(
-        index: _currentIndex,
-        children: _screens,
-      ),
-      bottomNavigationBar: _BottomNav(
-        currentIndex: _currentIndex,
-        onTap: switchTab,
-        cartCount: cart.cartCount,
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => CartProvider()),
+        ChangeNotifierProvider(create: (_) => WishlistProvider()),
+      ],
+      child: Scaffold(
+        backgroundColor: AppTheme.backgroundColor,
+        body: IndexedStack(index: _currentIndex, children: _screens),
+        bottomNavigationBar: _BottomNav(
+          currentIndex: _currentIndex,
+          onTap: switchTab,
+          cartCount: context.watch<CartProvider>().cartCount,
+        ),
       ),
     );
   }
@@ -71,7 +81,7 @@ class _BottomNav extends StatelessWidget {
       decoration: const BoxDecoration(
         color: Colors.white,
         border: Border(
-          top: BorderSide(color: Color(0xFFE8E8E8), width: 0.8),
+          top: BorderSide(color: AppTheme.dividerColor, width: 0.8),
         ),
       ),
       child: SafeArea(
@@ -151,9 +161,7 @@ class _NavItem extends StatelessWidget {
             Icon(
               isActive ? activeIcon : icon,
               size: 24,
-              color: isActive
-                  ? const Color(0xFF2E7D32)
-                  : const Color(0xFFAAAAAA),
+              color: isActive ? AppTheme.primaryColor : AppTheme.textSecondary,
             ),
             const SizedBox(height: 3),
             Text(
@@ -162,8 +170,8 @@ class _NavItem extends StatelessWidget {
                 fontSize: 10,
                 fontWeight: isActive ? FontWeight.w700 : FontWeight.w400,
                 color: isActive
-                    ? const Color(0xFF2E7D32)
-                    : const Color(0xFFAAAAAA),
+                    ? AppTheme.primaryColor
+                    : AppTheme.textSecondary,
                 letterSpacing: 0.3,
               ),
             ),
@@ -173,7 +181,7 @@ class _NavItem extends StatelessWidget {
               width: isActive ? 16 : 0,
               height: 2.5,
               decoration: BoxDecoration(
-                color: const Color(0xFF2E7D32),
+                color: AppTheme.primaryColor,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -215,8 +223,8 @@ class _NavItemCart extends _NavItem {
                   isActive ? activeIcon : icon,
                   size: 24,
                   color: isActive
-                      ? const Color(0xFF2E7D32)
-                      : const Color(0xFFAAAAAA),
+                      ? AppTheme.primaryColor
+                      : AppTheme.textSecondary,
                 ),
                 if (cartCount > 0)
                   Positioned(
@@ -226,7 +234,7 @@ class _NavItemCart extends _NavItem {
                       width: 16,
                       height: 16,
                       decoration: const BoxDecoration(
-                        color: Color(0xFF1C1C1E),
+                        color: AppTheme.accentColor,
                         shape: BoxShape.circle,
                       ),
                       child: Center(
@@ -250,8 +258,8 @@ class _NavItemCart extends _NavItem {
                 fontSize: 10,
                 fontWeight: isActive ? FontWeight.w700 : FontWeight.w400,
                 color: isActive
-                    ? const Color(0xFF2E7D32)
-                    : const Color(0xFFAAAAAA),
+                    ? AppTheme.primaryColor
+                    : AppTheme.textSecondary,
                 letterSpacing: 0.3,
               ),
             ),
@@ -261,7 +269,7 @@ class _NavItemCart extends _NavItem {
               width: isActive ? 16 : 0,
               height: 2.5,
               decoration: BoxDecoration(
-                color: const Color(0xFF2E7D32),
+                color: AppTheme.primaryColor,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),

@@ -1,87 +1,74 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class AppTheme {
-  static const primaryColor = Color(0xFF2E7D32);
-  static const accentColor = Color(0xFF388E3C);
-  static const backgroundColor = Color(0xFFF5F7F5);
+  // Modern green color palette
+  static const primaryColor = Color(0xFF00C853); // Modern green
+  static const primaryLight = Color(0xFF69F0AE); // Light green
+  static const primaryDark = Color(0xFF007E33); // Dark green
+  static const accentColor = Color(0xFF00BFA5); // Teal accent
+  static const backgroundColor = Color(0xFFF1F8E9); // Light green background
   static const cardColor = Colors.white;
-  static const textPrimary = Color(0xFF1A1A2E);
-  static const textSecondary = Color(0xFF6B7280);
+  static const textPrimary = Color(0xFF212121);
+  static const textSecondary = Color(0xFF757575);
   static const shadowColor = Color(0x1A000000);
+  static const dividerColor = Color(0xFFBDBDBD);
+  static const shimmerBase = Color(0xFFE0E0E0);
+  static const shimmerHighlight = Color(0xFFF5F5F5);
+  static const successColor = Color(0xFF4CAF50);
+  static const errorColor = Color(0xFFE53935);
+  static const warningColor = Color(0xFFFB8C00);
 
   static ThemeData get lightTheme {
     return ThemeData(
       primaryColor: primaryColor,
       scaffoldBackgroundColor: backgroundColor,
       cardColor: cardColor,
-      textTheme: TextTheme(
-        headlineLarge: GoogleFonts.playfairDisplay(
-          fontSize: 30,
-          fontWeight: FontWeight.w700,
+      textTheme: const TextTheme(
+        titleLarge: TextStyle(
           color: textPrimary,
+          fontWeight: FontWeight.bold,
+          fontSize: 20,
         ),
-        titleLarge: GoogleFonts.playfairDisplay(
-          fontSize: 22,
-          fontWeight: FontWeight.w700,
+        bodyMedium: TextStyle(
           color: textPrimary,
+          fontSize: 16,
         ),
-        titleMedium: GoogleFonts.plusJakartaSans(
-          fontSize: 14,
+        titleMedium: TextStyle(
           color: textSecondary,
-        ),
-        bodyMedium: GoogleFonts.plusJakartaSans(
           fontSize: 14,
-          color: textPrimary,
-        ),
-        labelSmall: GoogleFonts.plusJakartaSans(
-          fontSize: 11,
-          color: textSecondary,
         ),
       ),
-      appBarTheme: AppBarTheme(
+      appBarTheme: const AppBarTheme(
         backgroundColor: primaryColor,
         elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.white),
-        titleTextStyle: GoogleFonts.playfairDisplay(
-          fontSize: 20,
-          fontWeight: FontWeight.w700,
+        iconTheme: IconThemeData(color: Colors.white),
+        titleTextStyle: TextStyle(
           color: Colors.white,
+          fontWeight: FontWeight.bold,
+          fontSize: 20,
         ),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: primaryColor,
-          foregroundColor: Colors.white,
           padding: const EdgeInsets.symmetric(vertical: 14),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(13),
+            borderRadius: BorderRadius.circular(8),
           ),
         ),
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: const Color(0xFFF8FAF9),
+        fillColor: Colors.white,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide.none,
+        ),
         contentPadding: const EdgeInsets.symmetric(
-          vertical: 14,
+          vertical: 12,
           horizontal: 16,
         ),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Color(0xFFD1D5DB)),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Color(0xFFD1D5DB)),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Color(0xFF4CAF50), width: 1.8),
-        ),
-        hintStyle: GoogleFonts.plusJakartaSans(
-          fontSize: 13,
-          color: const Color(0xFF9CA3AF),
-        ),
+        hintStyle: TextStyle(color: textSecondary.withOpacity(0.7)),
       ),
       bottomNavigationBarTheme: const BottomNavigationBarThemeData(
         backgroundColor: Colors.white,

@@ -203,11 +203,7 @@ class ProfileScreen extends StatelessWidget {
                           color: item.iconBg,
                           borderRadius: BorderRadius.circular(10),
                         ),
-                        child: Icon(
-                          item.icon,
-                          color: item.iconColor,
-                          size: 20,
-                        ),
+                        child: Icon(item.icon, color: item.iconColor, size: 20),
                       ),
                       const SizedBox(width: 14),
                       Expanded(
@@ -318,8 +314,7 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildLogoutButton(
-      BuildContext context, AuthProvider authProvider) {
+  Widget _buildLogoutButton(BuildContext context, AuthProvider authProvider) {
     return SizedBox(
       width: double.infinity,
       height: 52,

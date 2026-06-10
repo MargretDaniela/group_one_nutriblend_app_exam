@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 import '../providers/cart_provider.dart';
 import '../utils/theme.dart';
 import 'checkout_screen.dart';
-import 'main_screen.dart';
+import 'main_screen.dart' as main_screen;
 
 class CartScreen extends StatelessWidget {
   const CartScreen({Key? key}) : super(key: key);
@@ -163,7 +163,7 @@ class CartScreen extends StatelessWidget {
             ElevatedButton.icon(
               onPressed: () {
                 final mainState =
-                    context.findAncestorStateOfType<MainScreenState>();
+                    context.findAncestorStateOfType<main_screen.MainScreenState>();
                 mainState?.switchTab(1);
               },
               icon: const Icon(Icons.storefront_outlined, size: 18),
