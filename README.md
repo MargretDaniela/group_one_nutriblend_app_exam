@@ -2,8 +2,8 @@
 
 Images
 
-!(onb1.png) !(whole.png) 
-!(wishlist.png) (!cart.png) 
-!(home.png) !(insign.png) 
-!(signup.png) !(3onb.png) 
-!(2onb.png)
+![alt text](2onb.png)    ![alt text](onb1.png)
+![alt text](3onb.png)     ![alt text](signup.png)
+![alt text](insign.png)   ![alt text](home.png)
+![alt text](cart.png)     ![alt text](whole.png)
+![alt text](wishlist.png)
