@@ -94,8 +94,6 @@ class _BottomNav extends StatelessWidget {
                 onTap: onTap,
               ),
               _NavItem(
-                icon: Icons.grid_view_outlined,
-                activeIcon: Icons.grid_view_rounded,
                 icon: Icons.storefront_outlined,
                 activeIcon: Icons.storefront_rounded,
                 label: 'Shop',
@@ -103,9 +101,6 @@ class _BottomNav extends StatelessWidget {
                 currentIndex: currentIndex,
                 onTap: onTap,
               ),
-              _NavItemCart(
-                icon: Icons.shopping_cart_outlined,
-                activeIcon: Icons.shopping_cart_rounded,
               _BadgeNavItem(
                 icon: Icons.shopping_bag_outlined,
                 activeIcon: Icons.shopping_bag_rounded,
@@ -113,7 +108,6 @@ class _BottomNav extends StatelessWidget {
                 index: 2,
                 currentIndex: currentIndex,
                 onTap: onTap,
-                cartCount: cartCount,
                 badge: cartCount,
               ),
               _NavItem(

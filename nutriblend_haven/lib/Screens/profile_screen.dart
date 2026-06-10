@@ -141,7 +141,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       decoration: const BoxDecoration(
         gradient: LinearGradient(
           // Bright vivid green gradient top-to-bottom
-          colors: [AppTheme.primaryDark, AppTheme.primaryColor, Color(0xFF00E676)],
+          colors: [AppTheme.primaryDark, AppTheme.primaryColor, AppTheme.primaryLight],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -324,7 +324,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               return Column(
                 children: [
                   InkWell(
-                    onTap: item.onTap ?? () {},
+                    onTap: () {},
                     borderRadius: BorderRadius.only(
                       topLeft: i == 0 ? const Radius.circular(16) : Radius.zero,
                       topRight: i == 0 ? const Radius.circular(16) : Radius.zero,
@@ -429,13 +429,6 @@ class _Item {
   final Color color;
   final Color bg;
   final String title;
-  final VoidCallback? onTap;
 
-  const _MenuItem({
-    required this.icon,
-    required this.iconColor,
-    required this.iconBg,
-    required this.title,
-  }) : onTap = null;
-  const _Item({required this.icon, required this.color, required this.bg, required this.title, this.onTap});
+  const _Item({required this.icon, required this.color, required this.bg, required this.title});
 }

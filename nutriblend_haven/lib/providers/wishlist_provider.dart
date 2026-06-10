@@ -7,7 +7,7 @@ class WishlistProvider extends ChangeNotifier {
 
   int get count => _wishlist.length;
 
-  bool isLoved(dynamic productId) {
+  bool isInWishlist(dynamic productId) {
     return _wishlist.any((item) => item['id'] == productId);
   }
 
@@ -20,18 +20,4 @@ class WishlistProvider extends ChangeNotifier {
     }
     notifyListeners();
   }
-  final Set<int> _ids = {};
-
-  bool isWishlisted(int id) => _ids.contains(id);
-
-  void toggle(int id) {
-    if (_ids.contains(id)) {
-      _ids.remove(id);
-    } else {
-      _ids.add(id);
-    }
-    notifyListeners();
-  }
-
-  int get count => _ids.length;
 }

@@ -6,7 +6,7 @@ import '../providers/wishlist_provider.dart';
 import '../utils/theme.dart';
 
 class WishlistScreen extends StatelessWidget {
-  const WishlistScreen({Key? key}) : super(key: key);
+  const WishlistScreen({super.key});
 
   String _formatPrice(dynamic price) {
     final number = double.tryParse(price.toString()) ?? 0;
@@ -26,7 +26,7 @@ class WishlistScreen extends StatelessWidget {
     final wishlist = wishlistProvider.wishlist;
 
     return Scaffold(
-      backgroundColor: AppTheme.backgroundColor,
+      backgroundColor: AppTheme.scaffold,
       appBar: AppBar(
         backgroundColor: AppTheme.primaryColor,
         foregroundColor: Colors.white,

@@ -1,17 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
-import '../providers/cart_provider.dart';
 import '../providers/wishlist_provider.dart';
 import '../services/product_service.dart';
 import '../utils/theme.dart';
-import 'home_screen.dart';
 import 'wishlist_screen.dart';
 import 'package:shimmer/shimmer.dart';
-import '../services/product_service.dart';
-import '../utils/theme.dart';
 import '../widgets/product_grid_card.dart';
 import '../widgets/reusable_widgets.dart';
+import 'product_detail_screen.dart';
 
 class ProductsScreen extends StatefulWidget {
   const ProductsScreen({super.key});
@@ -328,13 +325,70 @@ class _ProductsScreenState extends State<ProductsScreen> {
               crossAxisSpacing: 14,
               childAspectRatio: 0.65),
           delegate: SliverChildBuilderDelegate(
-            (_, __) => Shimmer.fromColors(
-              baseColor: Colors.grey.shade200,
-              highlightColor: Colors.grey.shade50,
-              child: Container(
-                  decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(20))),
+            (_, __) => Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                      color: Colors.black.withOpacity(0.04),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4)),
+                ],
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    flex: 55,
+                    child: Shimmer.fromColors(
+                      baseColor: Colors.grey.shade200,
+                      highlightColor: Colors.grey.shade50,
+                      child: Container(
+                        decoration: const BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                        ),
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    flex: 45,
+                    child: Padding(
+                      padding: const EdgeInsets.all(10),
+                      child: Shimmer.fromColors(
+                        baseColor: Colors.grey.shade200,
+                        highlightColor: Colors.grey.shade50,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Container(height: 12, width: 80, color: Colors.white),
+                            const SizedBox(height: 8),
+                            Container(height: 12, width: double.infinity, color: Colors.white),
+                            const SizedBox(height: 4),
+                            Container(height: 12, width: 50, color: Colors.white),
+                            const Spacer(),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Container(height: 16, width: 40, color: Colors.white),
+                                Container(
+                                  height: 32,
+                                  width: 32,
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
             childCount: 8,
           ),
@@ -378,8 +432,16 @@ class _ProductsScreenState extends State<ProductsScreen> {
             crossAxisSpacing: 14,
             childAspectRatio: 0.65),
         delegate: SliverChildBuilderDelegate(
-          (_, i) => ProductGridCard(
+          (_, i) => GestureDetector(
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => ProductDetailScreen(product: _products[i]),
+              ),
+            ),
+            child: ProductGridCard(
               product: _products[i] as Map<String, dynamic>),
+          ),
           childCount: _products.length,
         ),
       ),

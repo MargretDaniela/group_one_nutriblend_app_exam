@@ -2,17 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class AppTheme {
-  // Bright, vivid green palette
-  static const primaryColor   = Color(0xFF00C853); // vivid green
-  static const primaryDark    = Color(0xFF00A040); // deeper green
-  static const primaryLight   = Color(0xFF69F0AE); // bright mint
-  static const accent         = Color(0xFFB9F6CA); // soft mint fill
-  static const accentDeep     = Color(0xFF00E676); // neon-ish accent
-  static const scaffold       = Color(0xFFF3FFF7); // very light green tint
+  // Deep, rich earthy green palette
+  static const primaryColor   = Color(0xFF2E7D32); // Deep green from the image
+  static const primaryDark    = Color(0xFF1B5E20); // Darker shade
+  static const primaryLight   = Color(0xFF66BB6A); // Lighter shade for accents
+  static const accent         = Color(0xFFC8E6C9); // Soft mint fill
+  static const accentDeep     = Color(0xFF4CAF50); // Vibrant accent
+  static const scaffold       = Color(0xFFF9FBF9); // Very light grayish green
   static const cardColor      = Colors.white;
-  static const textPrimary    = Color(0xFF0D2B1A);
-  static const textSecondary  = Color(0xFF5A7568);
-  static const divider        = Color(0xFFDCF5E4);
+  static const textPrimary    = Color(0xFF1E2E22);
+  static const textSecondary  = Color(0xFF5C6F61);
+  static const divider        = Color(0xFFE2EBE4);
 
   static ThemeData get lightTheme {
     return ThemeData(

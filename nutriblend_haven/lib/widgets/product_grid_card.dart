@@ -34,10 +34,14 @@ class ProductGridCard extends StatelessWidget {
     final category = (product['category']?['name'] ?? '') as String;
     final bool inStock = (product['in_stock'] ?? true) as bool;
     final int id = (product['id'] ?? 0) as int;
+    
+    // Fallback logic for mock rating and reviews if none provided by API
+    final double rating = double.tryParse(product['rating']?.toString() ?? '') ?? (3.0 + (id % 21) / 10.0);
+    final int reviewsCount = int.tryParse(product['reviews_count']?.toString() ?? '') ?? (12 + (id * 7) % 250);
 
     final bg = _bgs[id % _bgs.length];
     final inCart = cart.isInCart(id);
-    final wishlisted = wl.isWishlisted(id);
+    final wishlisted = wl.isInWishlist(id);
 
     final double cardWidth = isFeatured ? 148.0 : double.infinity;
     final double imageHeight = isFeatured ? 110.0 : double.infinity;
@@ -62,14 +66,14 @@ class ProductGridCard extends StatelessWidget {
           isFeatured
               ? _ImageSection(
                   image: image, bg: bg, inStock: inStock,
-                  wishlisted: wishlisted, onWishlist: () => wl.toggle(id),
+                  wishlisted: wishlisted, onWishlist: () => wl.toggleWishlist(product),
                   height: imageHeight, borderRadius: 20,
                 )
               : Expanded(
                   flex: 55,
                   child: _ImageSection(
                     image: image, bg: bg, inStock: inStock,
-                    wishlisted: wishlisted, onWishlist: () => wl.toggle(id),
+                    wishlisted: wishlisted, onWishlist: () => wl.toggleWishlist(product),
                     height: null, borderRadius: 20,
                   ),
                 ),
@@ -79,6 +83,7 @@ class ProductGridCard extends StatelessWidget {
               ? _InfoSection(
                   name: name, price: price, category: category,
                   inStock: inStock, inCart: inCart, isFeatured: true,
+                  rating: rating, reviewsCount: reviewsCount,
                   onAddToCart: _addToCart(context, cart, id, name, price),
                 )
               : Expanded(
@@ -86,6 +91,7 @@ class ProductGridCard extends StatelessWidget {
                   child: _InfoSection(
                     name: name, price: price, category: category,
                     inStock: inStock, inCart: inCart, isFeatured: false,
+                    rating: rating, reviewsCount: reviewsCount,
                     onAddToCart: _addToCart(context, cart, id, name, price),
                   ),
                 ),
@@ -233,11 +239,14 @@ class _InfoSection extends StatelessWidget {
   final bool inStock;
   final bool inCart;
   final bool isFeatured;
+  final double rating;
+  final int reviewsCount;
   final VoidCallback? onAddToCart;
 
   const _InfoSection({
     required this.name, required this.price, required this.category,
     required this.inStock, required this.inCart, required this.isFeatured,
+    required this.rating, required this.reviewsCount,
     required this.onAddToCart,
   });
 
@@ -269,13 +278,31 @@ class _InfoSection extends StatelessWidget {
                       fontWeight: FontWeight.w700,
                       color: AppTheme.textPrimary,
                       height: 1.3)),
-              if (!isFeatured) ...[
-                const SizedBox(height: 3),
-                Row(
-                  children: [
+              const SizedBox(height: 4),
+              Row(
+                children: [
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: List.generate(5, (index) {
+                      if (rating >= index + 1) {
+                        return const Icon(Icons.star_rounded, color: AppTheme.primaryColor, size: 12);
+                      } else if (rating >= index + 0.5) {
+                        return const Icon(Icons.star_half_rounded, color: AppTheme.primaryColor, size: 12);
+                      } else {
+                        return Icon(Icons.star_rounded, color: Colors.grey.shade300, size: 12);
+                      }
+                    }),
+                  ),
+                  const SizedBox(width: 4),
+                  Text('($reviewsCount)',
+                      style: GoogleFonts.plusJakartaSans(
+                          fontSize: 9,
+                          color: AppTheme.textSecondary)),
+                  if (!isFeatured) ...[
+                    const Spacer(),
                     Container(
-                      width: 6, height: 6,
-                      margin: const EdgeInsets.only(right: 4),
+                      width: 5, height: 5,
+                      margin: const EdgeInsets.only(right: 3),
                       decoration: BoxDecoration(
                         color: inStock
                             ? Colors.green.shade500
@@ -284,17 +311,17 @@ class _InfoSection extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      inStock ? 'In Stock' : 'Out of Stock',
+                      inStock ? 'In Stock' : 'Out',
                       style: GoogleFonts.plusJakartaSans(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w500,
+                          fontSize: 9,
+                          fontWeight: FontWeight.w600,
                           color: inStock
                               ? Colors.green.shade600
                               : Colors.red.shade400),
                     ),
                   ],
-                ),
-              ],
+                ],
+              ),
             ],
           ),
           Row(
