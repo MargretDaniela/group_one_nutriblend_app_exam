@@ -138,18 +138,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Widget _buildHeader() {
     return Container(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          // Bright vivid green gradient top-to-bottom
-          colors: [AppTheme.primaryDark, AppTheme.primaryColor, AppTheme.primaryLight],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-      ),
+      color: const Color(0xFF00A651),
       child: SafeArea(
         bottom: false,
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(20, 12, 20, 28),
+          padding: const EdgeInsets.fromLTRB(20, 14, 20, 28),
           child: Column(
             children: [
               // Title row
@@ -157,36 +150,34 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text('My Profile',
-                      style: GoogleFonts.playfairDisplay(
-                          fontSize: 22, fontWeight: FontWeight.w700, color: Colors.white)),
+                      style: GoogleFonts.dmSerifDisplay(
+                          fontSize: 22, color: Colors.white)),
                   Container(
                     width: 38, height: 38,
                     decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.2),
+                        color: Colors.white.withOpacity(0.18),
                         borderRadius: BorderRadius.circular(12)),
                     child: const Icon(Icons.edit_outlined, color: Colors.white, size: 18),
                   ),
                 ],
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 24),
               // Avatar + user info row
               Row(
                 children: [
-                  // Avatar circle with initials
                   Container(
-                    width: 76, height: 76,
+                    width: 72, height: 72,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: Colors.white.withOpacity(0.2),
-                      border: Border.all(color: Colors.white, width: 2.5),
+                      color: Colors.white.withOpacity(0.18),
+                      border: Border.all(color: Colors.white, width: 2),
                     ),
                     child: _loadingUser
                         ? const SizedBox()
                         : Center(
                             child: Text(_initials,
-                                style: GoogleFonts.playfairDisplay(
-                                    fontSize: 26, fontWeight: FontWeight.w700,
-                                    color: Colors.white)),
+                                style: GoogleFonts.dmSerifDisplay(
+                                    fontSize: 24, color: Colors.white)),
                           ),
                   ),
                   const SizedBox(width: 16),
@@ -195,29 +186,28 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(_name,
-                            style: GoogleFonts.plusJakartaSans(
-                                fontSize: 18, fontWeight: FontWeight.w700, color: Colors.white)),
+                            style: GoogleFonts.inter(
+                                fontSize: 17, fontWeight: FontWeight.w700, color: Colors.white)),
                         if (_email.isNotEmpty) ...[
-                          const SizedBox(height: 4),
+                          const SizedBox(height: 3),
                           Text(_email,
-                              style: GoogleFonts.plusJakartaSans(
-                                  fontSize: 13, color: Colors.white.withOpacity(0.85))),
+                              style: GoogleFonts.inter(
+                                  fontSize: 13, color: Colors.white.withOpacity(0.80))),
                         ],
                         const SizedBox(height: 10),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.2),
+                            color: Colors.white.withOpacity(0.18),
                             borderRadius: BorderRadius.circular(20),
-                            border: Border.all(color: Colors.white.withOpacity(0.4)),
                           ),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              const Icon(Icons.verified_rounded, color: Colors.white, size: 13),
+                              const Icon(Icons.verified_rounded, color: Colors.white, size: 12),
                               const SizedBox(width: 5),
                               Text('Verified Member',
-                                  style: GoogleFonts.plusJakartaSans(
+                                  style: GoogleFonts.inter(
                                       fontSize: 11, fontWeight: FontWeight.w600,
                                       color: Colors.white)),
                             ],
@@ -279,10 +269,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
           const SizedBox(height: 6),
           Text(value,
-              style: GoogleFonts.plusJakartaSans(
+              style: GoogleFonts.inter(
                   fontSize: 18, fontWeight: FontWeight.w800, color: AppTheme.textPrimary)),
           Text(label,
-              style: GoogleFonts.plusJakartaSans(
+              style: GoogleFonts.inter(
                   fontSize: 11, color: AppTheme.textSecondary)),
         ],
       ),
@@ -299,7 +289,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         Padding(
           padding: const EdgeInsets.only(left: 4),
           child: Text(label,
-              style: GoogleFonts.plusJakartaSans(
+              style: GoogleFonts.inter(
                   fontSize: 11, fontWeight: FontWeight.w700,
                   color: AppTheme.primaryColor, letterSpacing: 1.2)),
         ),
@@ -344,7 +334,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           const SizedBox(width: 14),
                           Expanded(
                             child: Text(item.title,
-                                style: GoogleFonts.plusJakartaSans(
+                                style: GoogleFonts.inter(
                                     fontSize: 14, fontWeight: FontWeight.w500,
                                     color: AppTheme.textPrimary)),
                           ),
@@ -382,20 +372,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
             builder: (_) => AlertDialog(
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
               title: Text('Log Out',
-                  style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w700, fontSize: 17)),
+                  style: GoogleFonts.inter(fontWeight: FontWeight.w700, fontSize: 17)),
               content: Text('Are you sure you want to log out?',
-                  style: GoogleFonts.plusJakartaSans(fontSize: 14, color: AppTheme.textSecondary)),
+                  style: GoogleFonts.inter(fontSize: 14, color: AppTheme.textSecondary)),
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(context, false),
                   child: Text('Cancel',
-                      style: GoogleFonts.plusJakartaSans(
+                      style: GoogleFonts.inter(
                           fontWeight: FontWeight.w600, color: AppTheme.textSecondary)),
                 ),
                 TextButton(
                   onPressed: () => Navigator.pop(context, true),
                   child: Text('Log Out',
-                      style: GoogleFonts.plusJakartaSans(
+                      style: GoogleFonts.inter(
                           fontWeight: FontWeight.w700, color: Colors.red)),
                 ),
               ],
@@ -413,7 +403,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         },
         icon: const Icon(Icons.logout_rounded, size: 18),
         label: Text('Log Out',
-            style: GoogleFonts.plusJakartaSans(fontSize: 15, fontWeight: FontWeight.w600)),
+            style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w600)),
         style: OutlinedButton.styleFrom(
           foregroundColor: Colors.red,
           side: const BorderSide(color: Colors.red, width: 1.4),

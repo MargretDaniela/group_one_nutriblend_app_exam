@@ -1,3 +1,4 @@
+import '../utils/app_snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
@@ -33,7 +34,7 @@ class WishlistScreen extends StatelessWidget {
         elevation: 0,
         title: Text(
           'Wishlist',
-          style: GoogleFonts.playfairDisplay(
+          style: GoogleFonts.dmSerifDisplay(
             fontSize: 20,
             fontWeight: FontWeight.w700,
             color: Colors.white,
@@ -63,7 +64,7 @@ class WishlistScreen extends StatelessWidget {
                     const SizedBox(height: 20),
                     Text(
                       'Your wishlist is empty',
-                      style: GoogleFonts.playfairDisplay(
+                      style: GoogleFonts.dmSerifDisplay(
                         fontSize: 22,
                         fontWeight: FontWeight.w700,
                         color: AppTheme.textPrimary,
@@ -72,7 +73,7 @@ class WishlistScreen extends StatelessWidget {
                     const SizedBox(height: 8),
                     Text(
                       'Tap the heart icon on products to save them for later',
-                      style: GoogleFonts.plusJakartaSans(
+                      style: GoogleFonts.inter(
                         fontSize: 14,
                         color: AppTheme.textSecondary,
                       ),
@@ -128,7 +129,7 @@ class WishlistScreen extends StatelessWidget {
               child: Container(
                 width: 70,
                 height: 70,
-                color: const Color(0xFFF1F8E9),
+                color: const Color(0xFFF7F8F7),
                 child: image.isNotEmpty
                     ? Image.network(
                         image,
@@ -155,7 +156,7 @@ class WishlistScreen extends StatelessWidget {
                       Expanded(
                         child: Text(
                           name,
-                          style: GoogleFonts.plusJakartaSans(
+                          style: GoogleFonts.inter(
                             fontSize: 14,
                             fontWeight: FontWeight.w700,
                             color: AppTheme.textPrimary,
@@ -180,7 +181,7 @@ class WishlistScreen extends StatelessWidget {
                   const SizedBox(height: 6),
                   Text(
                     _formatPrice(price),
-                    style: GoogleFonts.plusJakartaSans(
+                    style: GoogleFonts.inter(
                       fontSize: 13,
                       fontWeight: FontWeight.w800,
                       color: AppTheme.primaryColor,
@@ -199,23 +200,7 @@ class WishlistScreen extends StatelessWidget {
                                 'price': price,
                               });
                               wishlistProvider.toggleWishlist(item);
-                              ScaffoldMessenger.of(context)
-                                ..clearSnackBars()
-                                ..showSnackBar(SnackBar(
-                                  content: Text(
-                                    'Moved to cart',
-                                    style: GoogleFonts.plusJakartaSans(
-                                        fontSize: 13),
-                                  ),
-                                  backgroundColor: AppTheme.primaryColor,
-                                  behavior: SnackBarBehavior.floating,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                  margin:
-                                      const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                                  duration: const Duration(seconds: 1),
-                                ));
+                              showAppSnackBar(context, 'Moved to cart', success: true);
                             }
                           : null,
                       style: ElevatedButton.styleFrom(
@@ -231,7 +216,7 @@ class WishlistScreen extends StatelessWidget {
                       icon: const Icon(Icons.shopping_cart_outlined, size: 16),
                       label: Text(
                         inStock ? 'Add to Cart' : 'Out of Stock',
-                        style: GoogleFonts.plusJakartaSans(
+                        style: GoogleFonts.inter(
                           fontSize: 12,
                           fontWeight: FontWeight.w700,
                         ),

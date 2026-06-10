@@ -1,3 +1,4 @@
+import '../utils/app_snackbar.dart';
 // ignore_for_file: deprecated_member_use, unused_element
 
 import 'dart:convert';
@@ -117,20 +118,7 @@ class _RegisterScreenState extends State<RegisterScreen>
   }
 
   void _showBar(String message, {required bool error}) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          message,
-          style: GoogleFonts.plusJakartaSans(fontSize: 13),
-        ),
-        backgroundColor:
-            error ? const Color(0xFFDC2626) : const Color(0xFF16A34A),
-        behavior: SnackBarBehavior.floating,
-        shape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-      ),
-    );
+    showAppSnackBar(context, message, success: !error);
   }
 
 
@@ -159,14 +147,14 @@ class _RegisterScreenState extends State<RegisterScreen>
                 width: 44,
                 height: 44,
                 child: CircularProgressIndicator(
-                  color: Color(0xFF2E7D32),
+                  color: Color(0xFF00A651),
                   strokeWidth: 3.5,
                 ),
               ),
               const SizedBox(height: 18),
               Text(
                 'Creating account…',
-                style: GoogleFonts.plusJakartaSans(
+                style: GoogleFonts.inter(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
                   color: const Color(0xFF1A1A2E),
@@ -175,7 +163,7 @@ class _RegisterScreenState extends State<RegisterScreen>
               const SizedBox(height: 4),
               Text(
                 'Please wait',
-                style: GoogleFonts.plusJakartaSans(
+                style: GoogleFonts.inter(
                   fontSize: 12,
                   color: const Color(0xFF6B7280),
                 ),
@@ -246,15 +234,15 @@ class _RegisterScreenState extends State<RegisterScreen>
           children: [
             Text(
               'NutriBlend',
-              style: GoogleFonts.playfairDisplay(
+              style: GoogleFonts.dmSerifDisplay(
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
-                color: const Color(0xFF2E7D32),
+                color: const Color(0xFF00A651),
               ),
             ),
             Text(
               'Premium Health & Nutrition',
-              style: GoogleFonts.plusJakartaSans(
+              style: GoogleFonts.inter(
                 fontSize: 11,
                 color: const Color(0xFF6B7280),
               ),
@@ -271,7 +259,7 @@ class _RegisterScreenState extends State<RegisterScreen>
       children: [
         Text(
           'Create Account',
-          style: GoogleFonts.playfairDisplay(
+          style: GoogleFonts.dmSerifDisplay(
             fontSize: 30,
             fontWeight: FontWeight.w700,
             color: const Color(0xFF1A1A2E),
@@ -281,7 +269,7 @@ class _RegisterScreenState extends State<RegisterScreen>
         const SizedBox(height: 6),
         Text(
           'Fill in the details below to get started',
-          style: GoogleFonts.plusJakartaSans(
+          style: GoogleFonts.inter(
             fontSize: 14,
             color: const Color(0xFF6B7280),
           ),
@@ -299,7 +287,7 @@ class _RegisterScreenState extends State<RegisterScreen>
         border: Border.all(color: const Color(0xFFE5E7EB)),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF2E7D32).withOpacity(0.05),
+            color: const Color(0xFF00A651).withOpacity(0.05),
             blurRadius: 16,
             offset: const Offset(0, 4),
           ),
@@ -389,10 +377,10 @@ class _RegisterScreenState extends State<RegisterScreen>
                
                 onPressed: _isLoading ? null : _submit,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF2E7D32),
+                  backgroundColor: const Color(0xFF00A651),
                   foregroundColor: Colors.white,
                   disabledBackgroundColor:
-                      const Color(0xFF2E7D32).withOpacity(0.55),
+                      const Color(0xFF00A651).withOpacity(0.55),
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(13)),
                   elevation: 0,
@@ -400,7 +388,7 @@ class _RegisterScreenState extends State<RegisterScreen>
                
                 child: Text(
                   'Create Account',
-                  style: GoogleFonts.plusJakartaSans(
+                  style: GoogleFonts.inter(
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
                     letterSpacing: 0.2,
@@ -421,7 +409,7 @@ class _RegisterScreenState extends State<RegisterScreen>
         children: [
           Text(
             'Already have an account? ',
-            style: GoogleFonts.plusJakartaSans(
+            style: GoogleFonts.inter(
               fontSize: 13,
               color: const Color(0xFF6B7280),
             ),
@@ -437,12 +425,12 @@ class _RegisterScreenState extends State<RegisterScreen>
                     ),
             child: Text(
               'Sign In',
-              style: GoogleFonts.plusJakartaSans(
+              style: GoogleFonts.inter(
                 fontSize: 13,
                 fontWeight: FontWeight.w700,
                 color: _isLoading
                     ? const Color(0xFF9CA3AF)
-                    : const Color(0xFF2E7D32),
+                    : const Color(0xFF00A651),
               ),
             ),
           ),
@@ -454,7 +442,7 @@ class _RegisterScreenState extends State<RegisterScreen>
   Widget _label(String text) {
     return Text(
       text,
-      style: GoogleFonts.plusJakartaSans(
+      style: GoogleFonts.inter(
         fontSize: 13,
         fontWeight: FontWeight.w600,
         color: const Color(0xFF1A1A2E),
@@ -478,18 +466,18 @@ class _RegisterScreenState extends State<RegisterScreen>
       validator: validator,
       
       enabled: !_isLoading,
-      style: GoogleFonts.plusJakartaSans(
+      style: GoogleFonts.inter(
         fontSize: 14,
         color: const Color(0xFF1A1A2E),
         fontWeight: FontWeight.w500,
       ),
       decoration: InputDecoration(
         hintText: hint,
-        hintStyle: GoogleFonts.plusJakartaSans(
+        hintStyle: GoogleFonts.inter(
           fontSize: 13,
           color: const Color(0xFF9CA3AF),
         ),
-        prefixIcon: Icon(icon, color: const Color(0xFF4CAF50), size: 19),
+        prefixIcon: Icon(icon, color: const Color(0xFF00C260), size: 19),
         suffixIcon: toggleObscure != null
             ? IconButton(
                 icon: Icon(
@@ -517,7 +505,7 @@ class _RegisterScreenState extends State<RegisterScreen>
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide:
-              const BorderSide(color: Color(0xFF4CAF50), width: 1.8),
+              const BorderSide(color: Color(0xFF00C260), width: 1.8),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
@@ -528,7 +516,7 @@ class _RegisterScreenState extends State<RegisterScreen>
           borderSide:
               const BorderSide(color: Color(0xFFDC2626), width: 1.8),
         ),
-        errorStyle: GoogleFonts.plusJakartaSans(fontSize: 11),
+        errorStyle: GoogleFonts.inter(fontSize: 11),
       ),
     );
   }
@@ -657,7 +645,7 @@ class _RegisterScreenState extends State<RegisterScreen>
 //       SnackBar(
 //         content: Text(
 //           message,
-//           style: GoogleFonts.plusJakartaSans(fontSize: 13),
+//           style: GoogleFonts.inter(fontSize: 13),
 //         ),
 //         backgroundColor:
 //             error ? const Color(0xFFDC2626) : const Color(0xFF16A34A),
@@ -708,7 +696,7 @@ class _RegisterScreenState extends State<RegisterScreen>
 //           height: 44,
 //           decoration: BoxDecoration(
 //             gradient: const LinearGradient(
-//               colors: [Color(0xFF81C784), Color(0xFF2E7D32)],
+//               colors: [Color(0xFF4DC97E), Color(0xFF00A651)],
 //               begin: Alignment.topLeft,
 //               end: Alignment.bottomRight,
 //             ),
@@ -722,15 +710,15 @@ class _RegisterScreenState extends State<RegisterScreen>
 //           children: [
 //             Text(
 //               'NutriBlend',
-//               style: GoogleFonts.playfairDisplay(
+//               style: GoogleFonts.dmSerifDisplay(
 //                 fontSize: 18,
 //                 fontWeight: FontWeight.w700,
-//                 color: const Color(0xFF2E7D32),
+//                 color: const Color(0xFF00A651),
 //               ),
 //             ),
 //             Text(
 //               'Premium Health & Nutrition',
-//               style: GoogleFonts.plusJakartaSans(
+//               style: GoogleFonts.inter(
 //                 fontSize: 11,
 //                 color: const Color(0xFF6B7280),
 //               ),
@@ -747,7 +735,7 @@ class _RegisterScreenState extends State<RegisterScreen>
 //       children: [
 //         Text(
 //           'Create Account',
-//           style: GoogleFonts.playfairDisplay(
+//           style: GoogleFonts.dmSerifDisplay(
 //             fontSize: 30,
 //             fontWeight: FontWeight.w700,
 //             color: const Color(0xFF1A1A2E),
@@ -757,7 +745,7 @@ class _RegisterScreenState extends State<RegisterScreen>
 //         const SizedBox(height: 6),
 //         Text(
 //           'Fill in the details below to get started',
-//           style: GoogleFonts.plusJakartaSans(
+//           style: GoogleFonts.inter(
 //             fontSize: 14,
 //             color: const Color(0xFF6B7280),
 //           ),
@@ -775,7 +763,7 @@ class _RegisterScreenState extends State<RegisterScreen>
 //         border: Border.all(color: const Color(0xFFE5E7EB)),
 //         boxShadow: [
 //           BoxShadow(
-//             color: const Color(0xFF2E7D32).withOpacity(0.05),
+//             color: const Color(0xFF00A651).withOpacity(0.05),
 //             blurRadius: 16,
 //             offset: const Offset(0, 4),
 //           ),
@@ -854,10 +842,10 @@ class _RegisterScreenState extends State<RegisterScreen>
 //               child: ElevatedButton(
 //                 onPressed: _isLoading ? null : _submit,
 //                 style: ElevatedButton.styleFrom(
-//                   backgroundColor: const Color(0xFF2E7D32),
+//                   backgroundColor: const Color(0xFF00A651),
 //                   foregroundColor: Colors.white,
 //                   disabledBackgroundColor:
-//                       const Color(0xFF2E7D32).withOpacity(0.55),
+//                       const Color(0xFF00A651).withOpacity(0.55),
 //                   shape: RoundedRectangleBorder(
 //                       borderRadius: BorderRadius.circular(13)),
 //                   elevation: 0,
@@ -873,7 +861,7 @@ class _RegisterScreenState extends State<RegisterScreen>
 //                       )
 //                     : Text(
 //                         'Create Account',
-//                         style: GoogleFonts.plusJakartaSans(
+//                         style: GoogleFonts.inter(
 //                           fontSize: 15,
 //                           fontWeight: FontWeight.w600,
 //                           letterSpacing: 0.2,
@@ -894,7 +882,7 @@ class _RegisterScreenState extends State<RegisterScreen>
 //         children: [
 //           Text(
 //             'Already have an account? ',
-//             style: GoogleFonts.plusJakartaSans(
+//             style: GoogleFonts.inter(
 //               fontSize: 13,
 //               color: const Color(0xFF6B7280),
 //             ),
@@ -906,10 +894,10 @@ class _RegisterScreenState extends State<RegisterScreen>
 //             ),
 //             child: Text(
 //               'Sign In',
-//               style: GoogleFonts.plusJakartaSans(
+//               style: GoogleFonts.inter(
 //                 fontSize: 13,
 //                 fontWeight: FontWeight.w700,
-//                 color: const Color(0xFF2E7D32),
+//                 color: const Color(0xFF00A651),
 //               ),
 //             ),
 //           ),
@@ -921,7 +909,7 @@ class _RegisterScreenState extends State<RegisterScreen>
 //   Widget _label(String text) {
 //     return Text(
 //       text,
-//       style: GoogleFonts.plusJakartaSans(
+//       style: GoogleFonts.inter(
 //         fontSize: 13,
 //         fontWeight: FontWeight.w600,
 //         color: const Color(0xFF1A1A2E),
@@ -943,18 +931,18 @@ class _RegisterScreenState extends State<RegisterScreen>
 //       keyboardType: keyboardType,
 //       obscureText: obscure,
 //       validator: validator,
-//       style: GoogleFonts.plusJakartaSans(
+//       style: GoogleFonts.inter(
 //         fontSize: 14,
 //         color: const Color(0xFF1A1A2E),
 //         fontWeight: FontWeight.w500,
 //       ),
 //       decoration: InputDecoration(
 //         hintText: hint,
-//         hintStyle: GoogleFonts.plusJakartaSans(
+//         hintStyle: GoogleFonts.inter(
 //           fontSize: 13,
 //           color: const Color(0xFF9CA3AF),
 //         ),
-//         prefixIcon: Icon(icon, color: const Color(0xFF4CAF50), size: 19),
+//         prefixIcon: Icon(icon, color: const Color(0xFF00C260), size: 19),
 //         suffixIcon: toggleObscure != null
 //             ? IconButton(
 //                 icon: Icon(
@@ -981,7 +969,7 @@ class _RegisterScreenState extends State<RegisterScreen>
 //         ),
 //         focusedBorder: OutlineInputBorder(
 //           borderRadius: BorderRadius.circular(12),
-//           borderSide: const BorderSide(color: Color(0xFF4CAF50), width: 1.8),
+//           borderSide: const BorderSide(color: Color(0xFF00C260), width: 1.8),
 //         ),
 //         errorBorder: OutlineInputBorder(
 //           borderRadius: BorderRadius.circular(12),
@@ -992,7 +980,7 @@ class _RegisterScreenState extends State<RegisterScreen>
 //           borderSide:
 //               const BorderSide(color: Color(0xFFDC2626), width: 1.8),
 //         ),
-//         errorStyle: GoogleFonts.plusJakartaSans(fontSize: 11),
+//         errorStyle: GoogleFonts.inter(fontSize: 11),
 //       ),
 //     );
 //   }

@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../providers/cart_provider.dart';
 import '../providers/wishlist_provider.dart';
 import '../utils/theme.dart';
+import '../utils/app_snackbar.dart';
 
 /// Single reusable product card used in both HomeScreen and ProductsScreen.
 /// Set [isFeatured] to true for the horizontal scroll strip (narrower card).
@@ -17,10 +18,11 @@ class ProductGridCard extends StatelessWidget {
     this.isFeatured = false,
   });
 
+  // Subtle pastel backgrounds per-product slot
   static const _bgs = [
-    Color(0xFFE0F2F1), Color(0xFFFFF8E1),
-    Color(0xFFEDE7F6), Color(0xFFE1F5FE),
-    Color(0xFFFCE4EC), Color(0xFFF1F8E9),
+    Color(0xFFEFF6EE), Color(0xFFFFF8EE),
+    Color(0xFFEEF2FF), Color(0xFFEEF8FF),
+    Color(0xFFFFF0EE), Color(0xFFF0FAF4),
   ];
 
   @override
@@ -34,67 +36,66 @@ class ProductGridCard extends StatelessWidget {
     final category = (product['category']?['name'] ?? '') as String;
     final bool inStock = (product['in_stock'] ?? true) as bool;
     final int id = (product['id'] ?? 0) as int;
-    
-    // Fallback logic for mock rating and reviews if none provided by API
-    final double rating = double.tryParse(product['rating']?.toString() ?? '') ?? (3.0 + (id % 21) / 10.0);
-    final int reviewsCount = int.tryParse(product['reviews_count']?.toString() ?? '') ?? (12 + (id * 7) % 250);
+
+    final double rating =
+        double.tryParse(product['rating']?.toString() ?? '') ??
+            (3.0 + (id % 21) / 10.0);
+    final int reviewsCount =
+        int.tryParse(product['reviews_count']?.toString() ?? '') ??
+            (12 + (id * 7) % 250);
 
     final bg = _bgs[id % _bgs.length];
     final inCart = cart.isInCart(id);
     final wishlisted = wl.isInWishlist(id);
 
-    final double cardWidth = isFeatured ? 148.0 : double.infinity;
-    final double imageHeight = isFeatured ? 110.0 : double.infinity;
-
     return Container(
-      width: isFeatured ? cardWidth : null,
+      width: isFeatured ? 148.0 : null,
       margin: isFeatured ? const EdgeInsets.only(right: 12) : null,
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-              color: Colors.black.withOpacity(0.06),
-              blurRadius: 12,
-              offset: const Offset(0, 4)),
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 3),
+          ),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ── Image area ──────────────────────────────────────────────────────
-          isFeatured
-              ? _ImageSection(
-                  image: image, bg: bg, inStock: inStock,
-                  wishlisted: wishlisted, onWishlist: () => wl.toggleWishlist(product),
-                  height: imageHeight, borderRadius: 20,
-                )
-              : Expanded(
-                  flex: 55,
-                  child: _ImageSection(
-                    image: image, bg: bg, inStock: inStock,
-                    wishlisted: wishlisted, onWishlist: () => wl.toggleWishlist(product),
-                    height: null, borderRadius: 20,
-                  ),
-                ),
+          // ── Fixed-height image area ─────────────────────────────────────────
+          _ImageSection(
+            image: image,
+            bg: bg,
+            inStock: inStock,
+            wishlisted: wishlisted,
+            onWishlist: () {
+              wl.toggleWishlist(product);
+              showAppSnackBar(
+                context,
+                wl.isInWishlist(id) ? 'Added to wishlist' : 'Removed from wishlist',
+                success: true,
+              );
+            },
+            isFeatured: isFeatured,
+          ),
 
-          // ── Info area ────────────────────────────────────────────────────────
-          isFeatured
-              ? _InfoSection(
-                  name: name, price: price, category: category,
-                  inStock: inStock, inCart: inCart, isFeatured: true,
-                  rating: rating, reviewsCount: reviewsCount,
-                  onAddToCart: _addToCart(context, cart, id, name, price),
-                )
-              : Expanded(
-                  flex: 45,
-                  child: _InfoSection(
-                    name: name, price: price, category: category,
-                    inStock: inStock, inCart: inCart, isFeatured: false,
-                    rating: rating, reviewsCount: reviewsCount,
-                    onAddToCart: _addToCart(context, cart, id, name, price),
-                  ),
-                ),
+          // ── Info area ───────────────────────────────────────────────────────
+          Expanded(
+            child: _InfoSection(
+              name: name,
+              price: price,
+              category: category,
+              inStock: inStock,
+              inCart: inCart,
+              isFeatured: isFeatured,
+              rating: rating,
+              reviewsCount: reviewsCount,
+              onAddToCart: _addToCart(context, cart, id, name, price),
+            ),
+          ),
         ],
       ),
     );
@@ -110,30 +111,22 @@ class ProductGridCard extends StatelessWidget {
     final bool inStock = (product['in_stock'] ?? true) as bool;
     if (!inStock) return null;
     return () {
+      final wasInCart = cart.isInCart(id);
       cart.addToCart({
         'id': id,
         'name': name,
         'price': product['price'] ?? formattedPrice,
       });
-      ScaffoldMessenger.of(context)
-        ..clearSnackBars()
-        ..showSnackBar(SnackBar(
-          content: Text(
-            cart.isInCart(id) ? 'Quantity updated' : 'Added to cart',
-            style: GoogleFonts.plusJakartaSans(fontSize: 13),
-          ),
-          backgroundColor: AppTheme.primaryColor,
-          behavior: SnackBarBehavior.floating,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-          margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-          duration: const Duration(seconds: 1),
-        ));
+      showAppSnackBar(
+        context,
+        wasInCart ? 'Cart quantity updated' : '$name added to cart',
+        success: true,
+      );
     };
   }
 }
 
-// ── Private sub-widgets ───────────────────────────────────────────────────────
+// ── Image section ─────────────────────────────────────────────────────────────
 
 class _ImageSection extends StatelessWidget {
   final String image;
@@ -141,83 +134,99 @@ class _ImageSection extends StatelessWidget {
   final bool inStock;
   final bool wishlisted;
   final VoidCallback onWishlist;
-  final double? height;
-  final double borderRadius;
+  final bool isFeatured;
 
   const _ImageSection({
-    required this.image, required this.bg, required this.inStock,
-    required this.wishlisted, required this.onWishlist,
-    required this.height, required this.borderRadius,
+    required this.image,
+    required this.bg,
+    required this.inStock,
+    required this.wishlisted,
+    required this.onWishlist,
+    required this.isFeatured,
   });
+
+  // Fixed heights so all cards are exactly the same
+  double get _imageHeight => isFeatured ? 108.0 : 130.0;
 
   @override
   Widget build(BuildContext context) {
-    Widget imgWidget = image.isNotEmpty
-        ? Image.network(image,
-            fit: BoxFit.cover,
-            errorBuilder: (_, __, ___) => _placeholder())
-        : _placeholder();
-
-    if (height != null) {
-      imgWidget = SizedBox(height: height, width: double.infinity, child: imgWidget);
-    }
-
     return Stack(
       children: [
+        // Fixed-size image container — ensures uniform height across all cards
         ClipRRect(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(borderRadius)),
-          child: Container(
-            width: double.infinity, color: bg, child: imgWidget),
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+          child: SizedBox(
+            width: double.infinity,
+            height: _imageHeight,
+            child: ColoredBox(
+              color: bg,
+              child: image.isNotEmpty
+                  ? Image.network(
+                      image,
+                      fit: BoxFit.cover,
+                      width: double.infinity,
+                      height: _imageHeight,
+                      errorBuilder: (_, __, ___) => _placeholder(),
+                    )
+                  : _placeholder(),
+            ),
+          ),
         ),
+        // Out of stock overlay
         if (!inStock)
           Positioned.fill(
             child: ClipRRect(
               borderRadius:
-                  BorderRadius.vertical(top: Radius.circular(borderRadius)),
+                  const BorderRadius.vertical(top: Radius.circular(16)),
               child: Container(
-                color: Colors.black.withOpacity(0.42),
+                color: Colors.black.withOpacity(0.40),
                 alignment: Alignment.center,
                 child: Container(
                   padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.15),
+                    color: Colors.black.withOpacity(0.50),
                     borderRadius: BorderRadius.circular(20),
-                    border:
-                        Border.all(color: Colors.white.withOpacity(0.3)),
                   ),
-                  child: Text('OUT OF STOCK',
-                      style: GoogleFonts.plusJakartaSans(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w800,
-                          fontSize: 10,
-                          letterSpacing: 0.5)),
+                  child: Text(
+                    'OUT OF STOCK',
+                    style: GoogleFonts.inter(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 9,
+                      letterSpacing: 0.8,
+                    ),
+                  ),
                 ),
               ),
             ),
           ),
+        // Wishlist button
         Positioned(
-          top: 8,
-          right: 8,
+          top: 6,
+          right: 6,
           child: GestureDetector(
             onTap: onWishlist,
             child: Container(
-              width: 30,
-              height: 30,
+              width: 28,
+              height: 28,
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.92),
+                color: Colors.white,
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
-                      color: Colors.black.withOpacity(0.1), blurRadius: 6)
+                    color: Colors.black.withOpacity(0.08),
+                    blurRadius: 6,
+                  ),
                 ],
               ),
               child: Icon(
                 wishlisted
                     ? Icons.favorite_rounded
                     : Icons.favorite_border_rounded,
-                color: wishlisted ? Colors.red.shade400 : Colors.grey.shade400,
-                size: 16,
+                color:
+                    wishlisted ? const Color(0xFFE53935) : Colors.grey.shade400,
+                size: 15,
               ),
             ),
           ),
@@ -228,9 +237,11 @@ class _ImageSection extends StatelessWidget {
 
   Widget _placeholder() => Center(
         child: Icon(Icons.local_pharmacy_outlined,
-            color: Colors.grey.shade400, size: 36),
+            color: Colors.grey.shade300, size: 32),
       );
 }
+
+// ── Info section ─────────────────────────────────────────────────────────────
 
 class _InfoSection extends StatelessWidget {
   final String name;
@@ -244,9 +255,14 @@ class _InfoSection extends StatelessWidget {
   final VoidCallback? onAddToCart;
 
   const _InfoSection({
-    required this.name, required this.price, required this.category,
-    required this.inStock, required this.inCart, required this.isFeatured,
-    required this.rating, required this.reviewsCount,
+    required this.name,
+    required this.price,
+    required this.category,
+    required this.inStock,
+    required this.inCart,
+    required this.isFeatured,
+    required this.rating,
+    required this.reviewsCount,
     required this.onAddToCart,
   });
 
@@ -258,108 +274,100 @@ class _InfoSection extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
+          // Category + name + stars
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               if (category.isNotEmpty && !isFeatured)
-                Text(category,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.plusJakartaSans(
-                        fontSize: 10,
-                        color: AppTheme.primaryColor,
-                        fontWeight: FontWeight.w600)),
-              const SizedBox(height: 2),
-              Text(name,
-                  maxLines: 2,
+                Text(
+                  category,
+                  maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: GoogleFonts.plusJakartaSans(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700,
-                      color: AppTheme.textPrimary,
-                      height: 1.3)),
+                  style: GoogleFonts.inter(
+                    fontSize: 9,
+                    color: AppTheme.primaryColor,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 0.4,
+                  ),
+                ),
+              const SizedBox(height: 2),
+              Text(
+                name,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: GoogleFonts.inter(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: AppTheme.textPrimary,
+                  height: 1.3,
+                ),
+              ),
               const SizedBox(height: 4),
+              // Star row
               Row(
                 children: [
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: List.generate(5, (index) {
-                      if (rating >= index + 1) {
-                        return const Icon(Icons.star_rounded, color: AppTheme.primaryColor, size: 12);
-                      } else if (rating >= index + 0.5) {
-                        return const Icon(Icons.star_half_rounded, color: AppTheme.primaryColor, size: 12);
-                      } else {
-                        return Icon(Icons.star_rounded, color: Colors.grey.shade300, size: 12);
-                      }
-                    }),
+                  ...List.generate(5, (i) {
+                    if (rating >= i + 1) {
+                      return const Icon(Icons.star_rounded,
+                          color: Color(0xFFFFA500), size: 11);
+                    } else if (rating >= i + 0.5) {
+                      return const Icon(Icons.star_half_rounded,
+                          color: Color(0xFFFFA500), size: 11);
+                    } else {
+                      return Icon(Icons.star_rounded,
+                          color: Colors.grey.shade200, size: 11);
+                    }
+                  }),
+                  const SizedBox(width: 3),
+                  Text(
+                    '($reviewsCount)',
+                    style: GoogleFonts.inter(
+                      fontSize: 9,
+                      color: AppTheme.textSecondary,
+                    ),
                   ),
-                  const SizedBox(width: 4),
-                  Text('($reviewsCount)',
-                      style: GoogleFonts.plusJakartaSans(
-                          fontSize: 9,
-                          color: AppTheme.textSecondary)),
-                  if (!isFeatured) ...[
-                    const Spacer(),
-                    Container(
-                      width: 5, height: 5,
-                      margin: const EdgeInsets.only(right: 3),
-                      decoration: BoxDecoration(
-                        color: inStock
-                            ? Colors.green.shade500
-                            : Colors.red.shade400,
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                    Text(
-                      inStock ? 'In Stock' : 'Out',
-                      style: GoogleFonts.plusJakartaSans(
-                          fontSize: 9,
-                          fontWeight: FontWeight.w600,
-                          color: inStock
-                              ? Colors.green.shade600
-                              : Colors.red.shade400),
-                    ),
-                  ],
                 ],
               ),
             ],
           ),
+          // Price + add button
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Expanded(
-                child: Text(price,
-                    overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.plusJakartaSans(
-                        color: AppTheme.primaryDark,
-                        fontSize: 13,
-                        fontWeight: FontWeight.w900)),
+                child: Text(
+                  price,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.inter(
+                    color: const Color(0xFF007A3D),
+                    fontSize: 13,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
               ),
-              const SizedBox(width: 6),
+              const SizedBox(width: 4),
               GestureDetector(
                 onTap: onAddToCart,
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 200),
-                  width: 32,
-                  height: 32,
+                  width: 30,
+                  height: 30,
                   decoration: BoxDecoration(
-                    gradient: inStock && !inCart
-                        ? const LinearGradient(
-                            colors: [AppTheme.primaryColor, AppTheme.primaryDark],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight)
-                        : null,
-                    color: inStock
-                        ? (inCart ? const Color(0xFFE0F2F1) : null)
-                        : Colors.grey.shade200,
-                    borderRadius: BorderRadius.circular(10),
+                    color: !inStock
+                        ? Colors.grey.shade100
+                        : inCart
+                            ? const Color(0xFFE8F7EF)
+                            : const Color(0xFF00A651),
+                    borderRadius: BorderRadius.circular(9),
                   ),
                   child: Icon(
                     inCart ? Icons.check_rounded : Icons.add_rounded,
-                    color: inStock
-                        ? (inCart ? AppTheme.primaryColor : Colors.white)
-                        : Colors.grey.shade400,
-                    size: 18,
+                    color: !inStock
+                        ? Colors.grey.shade300
+                        : inCart
+                            ? const Color(0xFF00A651)
+                            : Colors.white,
+                    size: 17,
                   ),
                 ),
               ),

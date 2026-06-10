@@ -43,11 +43,11 @@ class SearchBarWidget extends StatelessWidget {
               textInputAction: TextInputAction.search,
               onSubmitted: onSearch,
               onChanged: onSearch,
-              style: GoogleFonts.plusJakartaSans(
+              style: GoogleFonts.inter(
                   fontSize: 14, color: AppTheme.textPrimary),
               decoration: InputDecoration(
                 hintText: hintText,
-                hintStyle: GoogleFonts.plusJakartaSans(
+                hintStyle: GoogleFonts.inter(
                     color: Colors.grey.shade400, fontSize: 14),
                 border: InputBorder.none,
                 isDense: true,
@@ -157,13 +157,13 @@ class EmptyStateWidget extends StatelessWidget {
             ),
             const SizedBox(height: 20),
             Text(title,
-                style: GoogleFonts.plusJakartaSans(
+                style: GoogleFonts.inter(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
                     color: AppTheme.textPrimary)),
             const SizedBox(height: 6),
             Text(subtitle,
-                style: GoogleFonts.plusJakartaSans(
+                style: GoogleFonts.inter(
                     fontSize: 13, color: AppTheme.textSecondary),
                 textAlign: TextAlign.center),
             if (actionLabel != null && onAction != null) ...[
@@ -180,7 +180,7 @@ class EmptyStateWidget extends StatelessWidget {
                       const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                 ),
                 child: Text(actionLabel!,
-                    style: GoogleFonts.plusJakartaSans(
+                    style: GoogleFonts.inter(
                         fontWeight: FontWeight.w600)),
               ),
             ],
@@ -218,14 +218,14 @@ class ErrorView extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             Text('Connection Error',
-                style: GoogleFonts.plusJakartaSans(
+                style: GoogleFonts.inter(
                     fontSize: 17,
                     fontWeight: FontWeight.w700,
                     color: AppTheme.textPrimary)),
             const SizedBox(height: 8),
             Text(message,
                 textAlign: TextAlign.center,
-                style: GoogleFonts.plusJakartaSans(
+                style: GoogleFonts.inter(
                     color: AppTheme.textSecondary, fontSize: 13)),
             const SizedBox(height: 24),
             ElevatedButton.icon(
@@ -233,7 +233,7 @@ class ErrorView extends StatelessWidget {
               icon: const Icon(Icons.refresh_rounded, size: 18),
               label: Text('Try Again',
                   style:
-                      GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w600)),
+                      GoogleFonts.inter(fontWeight: FontWeight.w600)),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppTheme.primaryColor,
                 foregroundColor: Colors.white,

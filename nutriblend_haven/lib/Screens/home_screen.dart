@@ -1,3 +1,4 @@
+// home_screen.dart
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -11,9 +12,6 @@ import '../widgets/product_grid_card.dart';
 import '../widgets/reusable_widgets.dart';
 import 'main_screen.dart';
 import 'wishlist_screen.dart';
-
-
-// ─── Hero slide data ──────────────────────────────────────────────────────────
 
 class _HeroSlide {
   final String imageUrl;
@@ -39,28 +37,26 @@ const _heroSlides = [
     badge: 'NEW ARRIVALS',
     headline: 'Premium Supplements\nFor Peak Performance',
     sub: 'Shop Now',
-    tintStart: Color(0xFF007A33),
-    tintEnd: Color(0xFF2E7D32),
+    tintStart: Color(0xFF005C2E),
+    tintEnd: Color(0xFF00A651),
   ),
   _HeroSlide(
     imageUrl: 'https://images.unsplash.com/photo-1579722820308-d74e571900a9?w=900&q=80',
     badge: 'BESTSELLERS',
     headline: 'Natural Vitamins\nFor Daily Wellness',
     sub: 'Explore',
-    tintStart: Color(0xFF1B5E20),
-    tintEnd: Color(0xFF43A047),
+    tintStart: Color(0xFF003D1F),
+    tintEnd: Color(0xFF007A3D),
   ),
   _HeroSlide(
     imageUrl: 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=900&q=80',
     badge: 'ORGANIC RANGE',
     headline: 'Pure & Certified\nOrganic Nutrition',
     sub: 'Discover',
-    tintStart: Color(0xFF004D40),
-    tintEnd: Color(0xFF00BFA5),
+    tintStart: Color(0xFF003366),
+    tintEnd: Color(0xFF0066CC),
   ),
 ];
-
-// ─── Screen ───────────────────────────────────────────────────────────────────
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -186,7 +182,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 children: [
                   _buildHeroCarousel(),
                   const SizedBox(height: 20),
-                  // Search bar with green styling
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 14),
                     child: SearchBarWidget(
@@ -197,7 +192,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   const SizedBox(height: 16),
                   _buildCategoryRow(),
                   const SizedBox(height: 24),
-                  // Quick stats / promo banner
                   _buildPromoBanner(),
                   const SizedBox(height: 24),
                   if (_products.isNotEmpty && !_isLoading) ...[
@@ -213,7 +207,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     'All Products',
                     trailing: _lastPage > 1
                         ? Text('Page $_currentPage of $_lastPage',
-                            style: GoogleFonts.plusJakartaSans(
+                            style: GoogleFonts.inter(
                                 fontSize: 12, color: AppTheme.textSecondary))
                         : null,
                   ),
@@ -234,20 +228,20 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildAppBar() {
     return SliverAppBar(
       pinned: true,
-      // Green gradient app bar instead of plain white
-      backgroundColor: AppTheme.primaryColor,
+      backgroundColor: Colors.white,
       surfaceTintColor: Colors.transparent,
       elevation: 0,
+      shadowColor: Colors.black12,
       titleSpacing: 16,
       title: Row(
         children: [
           Container(
-            width: 36, height: 36,
+            width: 34, height: 34,
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
+              color: const Color(0xFF00A651),
               borderRadius: BorderRadius.circular(10),
             ),
-            child: const Icon(Icons.local_florist_rounded, color: Colors.white, size: 18),
+            child: const Icon(Icons.eco_rounded, color: Colors.white, size: 18),
           ),
           const SizedBox(width: 10),
           Column(
@@ -255,11 +249,11 @@ class _HomeScreenState extends State<HomeScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text('NutriBlend',
-                  style: GoogleFonts.playfairDisplay(
-                      fontSize: 16, fontWeight: FontWeight.w800, color: Colors.white)),
+                  style: GoogleFonts.dmSerifDisplay(
+                      fontSize: 16, color: const Color(0xFF0D1F14))),
               Text('Premium Supplements',
-                  style: GoogleFonts.plusJakartaSans(
-                      fontSize: 10, color: Colors.white70)),
+                  style: GoogleFonts.inter(
+                      fontSize: 10, color: const Color(0xFF6B7B70))),
             ],
           ),
         ],
@@ -275,12 +269,12 @@ class _HomeScreenState extends State<HomeScreen> {
                   width: 36,
                   height: 36,
                   decoration: BoxDecoration(
-                    color: const Color(0xFFF1F8E9),
+                    color: const Color(0xFFF7F8F7),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: const Icon(
-                    Icons.shopping_cart_outlined,
-                    color: AppTheme.primaryColor,
+                    Icons.shopping_bag_outlined,
+                    color: Color(0xFF0D1F14),
                     size: 20,
                   ),
                 ),
@@ -293,7 +287,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     width: 16,
                     height: 16,
                     decoration: const BoxDecoration(
-                      color: AppTheme.primaryColor,
+                      color: Color(0xFF00A651),
                       shape: BoxShape.circle,
                     ),
                     child: Center(
@@ -323,7 +317,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   width: 36,
                   height: 36,
                   decoration: BoxDecoration(
-                    color: const Color(0xFFF1F8E9),
+                    color: const Color(0xFFF7F8F7),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: const Icon(
@@ -359,30 +353,10 @@ class _HomeScreenState extends State<HomeScreen> {
             ],
           ),
         ),
-        IconButton(
-          onPressed: () {
-            _loadCategories();
-            _loadPage(1);
-          },
-          icon: Container(
-            width: 36,
-            height: 36,
-            decoration: BoxDecoration(
-              color: const Color(0xFFF1F8E9),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: const Icon(
-              Icons.refresh_rounded,
-              color: AppTheme.primaryColor,
-              size: 20,
-            ),
-          ),
-        ),
         const SizedBox(width: 10),
       ],
     );
   }
-
 
   Widget _buildHeroCarousel() {
     return Padding(
@@ -463,7 +437,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       : [],
                 ),
                 child: Text(cat['name'] as String,
-                    style: GoogleFonts.plusJakartaSans(
+                    style: GoogleFonts.inter(
                       color: sel ? Colors.white : AppTheme.primaryDark,
                       fontWeight: sel ? FontWeight.w700 : FontWeight.w600,
                       fontSize: 13,
@@ -476,7 +450,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // Promo banner replacing the bland gap between categories and featured
   Widget _buildPromoBanner() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 14),
@@ -504,11 +477,11 @@ class _HomeScreenState extends State<HomeScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text('Free Delivery',
-                      style: GoogleFonts.playfairDisplay(
+                      style: GoogleFonts.dmSerifDisplay(
                           fontSize: 18, fontWeight: FontWeight.w800, color: Colors.white)),
                   const SizedBox(height: 4),
                   Text('On orders above UGX 50,000',
-                      style: GoogleFonts.plusJakartaSans(
+                      style: GoogleFonts.inter(
                           fontSize: 12, color: Colors.white.withOpacity(0.9))),
                 ],
               ),
@@ -544,7 +517,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               const SizedBox(width: 8),
               Text(title,
-                  style: GoogleFonts.playfairDisplay(
+                  style: GoogleFonts.dmSerifDisplay(
                       fontSize: 18, fontWeight: FontWeight.w800, color: AppTheme.textPrimary)),
             ],
           ),
@@ -558,7 +531,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text('See all',
-                    style: GoogleFonts.plusJakartaSans(
+                    style: GoogleFonts.inter(
                         fontSize: 12, fontWeight: FontWeight.w700, color: AppTheme.primaryDark)),
               ),
             )
@@ -681,7 +654,7 @@ class _HomeScreenState extends State<HomeScreen> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Text('$_currentPage / $_lastPage',
-                style: GoogleFonts.plusJakartaSans(
+                style: GoogleFonts.inter(
                     fontWeight: FontWeight.w700,
                     fontSize: 14,
                     color: AppTheme.textPrimary)),
@@ -695,8 +668,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 }
-
-// ─── Hero slide widget ────────────────────────────────────────────────────────
 
 class _HeroSlideWidget extends StatelessWidget {
   final _HeroSlide slide;
@@ -735,7 +706,7 @@ class _HeroSlideWidget extends StatelessWidget {
                   border: Border.all(color: Colors.white.withOpacity(0.4)),
                 ),
                 child: Text(slide.badge,
-                    style: GoogleFonts.plusJakartaSans(
+                    style: GoogleFonts.inter(
                         color: Colors.white, fontSize: 10,
                         fontWeight: FontWeight.w700, letterSpacing: 2)),
               ),
@@ -743,7 +714,7 @@ class _HeroSlideWidget extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(slide.headline,
-                      style: GoogleFonts.playfairDisplay(
+                      style: GoogleFonts.dmSerifDisplay(
                           color: Colors.white, fontSize: 22,
                           fontWeight: FontWeight.w800, height: 1.25)),
                   const SizedBox(height: 16),
@@ -755,7 +726,7 @@ class _HeroSlideWidget extends StatelessWidget {
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(30)),
                       child: Text(slide.sub,
-                          style: GoogleFonts.plusJakartaSans(
+                          style: GoogleFonts.inter(
                             color: AppTheme.primaryColor,
                             fontSize: 12,
                             fontWeight: FontWeight.w800,
@@ -772,7 +743,6 @@ class _HeroSlideWidget extends StatelessWidget {
     );
   }
 }
-
 
 class _ShimmerCard extends StatelessWidget {
   @override
@@ -844,5 +814,3 @@ class _ShimmerCard extends StatelessWidget {
     );
   }
 }
-
-

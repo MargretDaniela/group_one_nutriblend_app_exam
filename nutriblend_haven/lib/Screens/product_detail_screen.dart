@@ -1,3 +1,4 @@
+import '../utils/app_snackbar.dart';
 // ignore_for_file: deprecated_member_use
 
 import 'package:flutter/material.dart';
@@ -138,20 +139,11 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
             GestureDetector(
               onTap: () {
                 wishlist.toggleWishlist(widget.product);
-                ScaffoldMessenger.of(context)
-                  ..clearSnackBars()
-                  ..showSnackBar(SnackBar(
-                    content: Text(
-                      isWished ? 'Removed from wishlist' : 'Added to wishlist',
-                      style: GoogleFonts.plusJakartaSans(fontSize: 13),
-                    ),
-                    backgroundColor: AppTheme.primaryColor,
-                    behavior: SnackBarBehavior.floating,
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10)),
-                    margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                    duration: const Duration(seconds: 1),
-                  ));
+                showAppSnackBar(
+                  context,
+                  isWished ? 'Removed from wishlist' : 'Added to wishlist',
+                  success: true,
+                );
               },
               child: Container(
                 margin: const EdgeInsets.all(8),
@@ -223,7 +215,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
               ),
               child: Text(
                 categoryName.toUpperCase(),
-                style: GoogleFonts.plusJakartaSans(
+                style: GoogleFonts.inter(
                   fontSize: 10,
                   fontWeight: FontWeight.w700,
                   color: AppTheme.primaryColor,
@@ -237,7 +229,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
           // Product Name
           Text(
             name,
-            style: GoogleFonts.playfairDisplay(
+            style: GoogleFonts.dmSerifDisplay(
               fontSize: 24,
               fontWeight: FontWeight.w700,
               color: Colors.black87,
@@ -251,7 +243,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
             children: [
               Text(
                 price,
-                style: GoogleFonts.plusJakartaSans(
+                style: GoogleFonts.inter(
                   fontSize: 26,
                   fontWeight: FontWeight.w900,
                   color: AppTheme.primaryColor,
@@ -287,7 +279,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                     const SizedBox(width: 5),
                     Text(
                       inStock ? 'In Stock' : 'Out of Stock',
-                      style: GoogleFonts.plusJakartaSans(
+                      style: GoogleFonts.inter(
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
                         color: inStock
@@ -310,7 +302,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
           if (inStock) ...[
             Text(
               'Quantity',
-              style: GoogleFonts.plusJakartaSans(
+              style: GoogleFonts.inter(
                 fontSize: 14,
                 fontWeight: FontWeight.w700,
                 color: Colors.black87,
@@ -328,7 +320,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                 const SizedBox(width: 16),
                 Text(
                   '$_quantity',
-                  style: GoogleFonts.plusJakartaSans(
+                  style: GoogleFonts.inter(
                     fontSize: 18,
                     fontWeight: FontWeight.w800,
                     color: Colors.black87,
@@ -349,7 +341,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
           // Description
           Text(
             'About this product',
-            style: GoogleFonts.plusJakartaSans(
+            style: GoogleFonts.inter(
               fontSize: 15,
               fontWeight: FontWeight.w700,
               color: Colors.black87,
@@ -360,7 +352,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
             description.isNotEmpty
                 ? description.replaceAll(RegExp(r'<[^>]*>'), '')
                 : 'No description available for this product.',
-            style: GoogleFonts.plusJakartaSans(
+            style: GoogleFonts.inter(
               fontSize: 13.5,
               color: Colors.grey.shade600,
               height: 1.75,
@@ -403,23 +395,12 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                               0,
                         });
                       }
-                      ScaffoldMessenger.of(context)
-                        ..clearSnackBars()
-                        ..showSnackBar(SnackBar(
-                          content: Text(
-                            inCart
-                                ? 'Cart updated!'
-                                : '${_quantity}x $name added to cart!',
-                            style:
-                                GoogleFonts.plusJakartaSans(fontSize: 13),
-                          ),
-                          backgroundColor: AppTheme.primaryColor,
-                          behavior: SnackBarBehavior.floating,
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10)),
-                          margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                          duration: const Duration(seconds: 2),
-                        ));
+                      ScaffoldMessenger.of(context).clearSnackBars();
+                      showAppSnackBar(
+                        context,
+                        inCart ? 'Cart updated!' : '${_quantity}x $name added to cart!',
+                        success: true,
+                      );
                     }
                   : null,
               style: ElevatedButton.styleFrom(
@@ -445,7 +426,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                     inStock
                         ? (inCart ? 'Add More to Cart' : 'Add to Cart')
                         : 'Out of Stock',
-                    style: GoogleFonts.plusJakartaSans(
+                    style: GoogleFonts.inter(
                       fontSize: 15,
                       fontWeight: FontWeight.w700,
                     ),
