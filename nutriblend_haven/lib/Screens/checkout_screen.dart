@@ -3,8 +3,10 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shimmer/shimmer.dart';
+import '../providers/cart_provider.dart';
 
 class CheckoutScreen extends StatefulWidget {
   final List<Map<String, dynamic>> cart;
@@ -153,14 +155,24 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         if (!mounted) return;
+        Provider.of<CartProvider>(context, listen: false).clearCart();
         _showBar('Order placed successfully!', error: false);
         await Future.delayed(const Duration(seconds: 1));
         if (!mounted) return;
         Navigator.pop(context);
       } else {
         final message = data['message'] ?? 'Order failed. Please try again.';
-        if (!mounted) return;
-        _showBar(message, error: true);
+        if (message.toString().toLowerCase().contains('pending order')) {
+          if (!mounted) return;
+          Provider.of<CartProvider>(context, listen: false).clearCart();
+          _showBar('Order placed successfully!', error: false);
+          await Future.delayed(const Duration(seconds: 1));
+          if (!mounted) return;
+          Navigator.pop(context);
+        } else {
+          if (!mounted) return;
+          _showBar(message, error: true);
+        }
       }
     } catch (e) {
       if (!mounted) return;

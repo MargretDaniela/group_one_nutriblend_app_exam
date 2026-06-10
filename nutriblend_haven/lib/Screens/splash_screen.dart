@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import './on_boarding_screen_one.dart';
+import './onboarding_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -79,7 +79,7 @@ class _SplashScreenState extends State<SplashScreen>
     Navigator.pushReplacement(
       context,
       PageRouteBuilder(
-        pageBuilder: (_, __, ___) => const OnboardingScreenOne(),
+        pageBuilder: (_, __, ___) => const OnboardingScreen(),
         transitionsBuilder: (_, anim, __, child) =>
             FadeTransition(opacity: anim, child: child),
         transitionDuration: const Duration(milliseconds: 500),
@@ -241,12 +241,11 @@ class _AppLogo extends StatelessWidget {
       width: size,
       height: size,
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFF81C784), Color(0xFF2E7D32)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
         borderRadius: BorderRadius.circular(size * 0.27),
+        image: const DecorationImage(
+          image: AssetImage('assets/logo.png'),
+          fit: BoxFit.cover,
+        ),
         boxShadow: [
           BoxShadow(
             color: const Color(0xFF4CAF50).withOpacity(0.38),
@@ -255,7 +254,6 @@ class _AppLogo extends StatelessWidget {
           ),
         ],
       ),
-      child: CustomPaint(painter: _LogoPainter()),
     );
   }
 }

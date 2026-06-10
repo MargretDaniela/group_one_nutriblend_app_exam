@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 
 import 'providers/auth_provider.dart';
 import 'providers/cart_provider.dart';
+import 'providers/wishlist_provider.dart';
 import 'Screens/splash_screen.dart';
 
 void main() {
@@ -29,6 +30,7 @@ void main() {
       providers: [
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => CartProvider()),
+        ChangeNotifierProvider(create: (_) => WishlistProvider()),
       ],
       child: const NutriBlendApp(),
     ),

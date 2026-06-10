@@ -87,22 +87,22 @@ class _BottomNav extends StatelessWidget {
                 currentIndex: currentIndex,
                 onTap: onTap,
               ),
-              _NavItemCart(
+              _NavItem(
                 icon: Icons.grid_view_outlined,
                 activeIcon: Icons.grid_view_rounded,
                 label: 'Shop',
                 index: 1,
                 currentIndex: currentIndex,
                 onTap: onTap,
-                cartCount: cartCount,
               ),
-              _NavItem(
+              _NavItemCart(
                 icon: Icons.shopping_cart_outlined,
                 activeIcon: Icons.shopping_cart_rounded,
                 label: 'Cart',
                 index: 2,
                 currentIndex: currentIndex,
                 onTap: onTap,
+                cartCount: cartCount,
               ),
               _NavItem(
                 icon: Icons.person_outline_rounded,

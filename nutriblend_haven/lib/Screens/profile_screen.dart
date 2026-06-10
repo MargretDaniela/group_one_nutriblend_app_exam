@@ -412,6 +412,5 @@ class _MenuItem {
     required this.iconColor,
     required this.iconBg,
     required this.title,
-    this.onTap,
-  });
+  }) : onTap = null;
 }

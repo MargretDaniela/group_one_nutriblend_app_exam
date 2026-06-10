@@ -3,9 +3,11 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
 import '../providers/cart_provider.dart';
+import '../providers/wishlist_provider.dart';
 import '../services/product_service.dart';
 import '../utils/theme.dart';
 import 'main_screen.dart';
+import 'wishlist_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -234,12 +236,60 @@ class _HomeScreenState extends State<HomeScreen> {
                     width: 16,
                     height: 16,
                     decoration: const BoxDecoration(
-                      color: Colors.red,
+                      color: AppTheme.primaryColor,
                       shape: BoxShape.circle,
                     ),
                     child: Center(
                       child: Text(
                         cart.cartCount > 9 ? '9+' : '${cart.cartCount}',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 9,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ),
+        Consumer<WishlistProvider>(
+          builder: (context, wishlist, _) => Stack(
+            alignment: Alignment.center,
+            children: [
+              IconButton(
+                onPressed: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (_) => const WishlistScreen()));
+                },
+                icon: Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF1F8E9),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(
+                    Icons.favorite_outline_rounded,
+                    color: AppTheme.primaryColor,
+                    size: 20,
+                  ),
+                ),
+              ),
+              if (wishlist.count > 0)
+                Positioned(
+                  top: 6,
+                  right: 6,
+                  child: Container(
+                    width: 16,
+                    height: 16,
+                    decoration: const BoxDecoration(
+                      color: AppTheme.primaryColor,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Center(
+                      child: Text(
+                        wishlist.count > 9 ? '9+' : '${wishlist.count}',
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 9,
@@ -690,12 +740,14 @@ class _FeaturedCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cartProvider = Provider.of<CartProvider>(context);
     final image = (product['main_image'] ?? '') as String;
     final name = (product['name'] ?? 'Product').toString().trim();
     final price = (product['formatted_price'] ?? '') as String;
     final bool inStock = (product['in_stock'] ?? true) as bool;
     final int id = (product['id'] ?? 0) as int;
     final bg = _bgs[id % _bgs.length];
+    final inCart = cartProvider.isInCart(id);
 
     return Container(
       width: 148,
@@ -715,27 +767,36 @@ class _FeaturedCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          ClipRRect(
-            borderRadius:
-                const BorderRadius.vertical(top: Radius.circular(18)),
-            child: Container(
-              height: 110,
-              width: double.infinity,
-              color: bg,
-              child: image.isNotEmpty
-                  ? Image.network(
-                      image,
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => Center(
-                        child: Icon(Icons.local_pharmacy_outlined,
-                            color: Colors.grey.shade400, size: 32),
-                      ),
-                    )
-                  : Center(
-                      child: Icon(Icons.local_pharmacy_outlined,
-                          color: Colors.grey.shade400, size: 32),
-                    ),
-            ),
+          Stack(
+            children: [
+              ClipRRect(
+                borderRadius:
+                    const BorderRadius.vertical(top: Radius.circular(18)),
+                child: Container(
+                  height: 110,
+                  width: double.infinity,
+                  color: bg,
+                  child: image.isNotEmpty
+                      ? Image.network(
+                          image,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) => Center(
+                            child: Icon(Icons.local_pharmacy_outlined,
+                                color: Colors.grey.shade400, size: 32),
+                          ),
+                        )
+                      : Center(
+                          child: Icon(Icons.local_pharmacy_outlined,
+                              color: Colors.grey.shade400, size: 32),
+                        ),
+                ),
+              ),
+              Positioned(
+                top: 8,
+                right: 8,
+                child: _WishlistButton(product: product),
+              ),
+            ],
           ),
           Expanded(
             child: Padding(
@@ -768,23 +829,60 @@ class _FeaturedCard extends StatelessWidget {
                           ),
                         ),
                       ),
-                      if (!inStock)
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 5, vertical: 2),
+                      const SizedBox(width: 6),
+                      GestureDetector(
+                        onTap: inStock
+                            ? () {
+                                cartProvider.addToCart({
+                                  'id': id,
+                                  'name': name,
+                                  'price': product['price'] ??
+                                      product['formatted_price'] ??
+                                      0,
+                                });
+                                ScaffoldMessenger.of(context)
+                                  ..clearSnackBars()
+                                  ..showSnackBar(SnackBar(
+                                    content: Text(
+                                      inCart
+                                          ? 'Quantity updated'
+                                          : 'Added to cart',
+                                      style: GoogleFonts.plusJakartaSans(
+                                          fontSize: 13),
+                                    ),
+                                    backgroundColor: AppTheme.primaryColor,
+                                    behavior: SnackBarBehavior.floating,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    margin: const EdgeInsets.fromLTRB(
+                                        16, 0, 16, 16),
+                                    duration: const Duration(seconds: 1),
+                                  ));
+                              }
+                            : null,
+                        child: Container(
+                          width: 30,
+                          height: 30,
                           decoration: BoxDecoration(
-                            color: Colors.red.shade50,
-                            borderRadius: BorderRadius.circular(6),
+                            color: inStock
+                                ? (inCart
+                                    ? AppTheme.primaryColor.withOpacity(0.15)
+                                    : AppTheme.primaryColor)
+                                : Colors.grey.shade300,
+                            borderRadius: BorderRadius.circular(10),
                           ),
-                          child: Text(
-                            'Out',
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: 9,
-                              color: Colors.red.shade400,
-                              fontWeight: FontWeight.w700,
-                            ),
+                          child: Icon(
+                            inCart ? Icons.check_rounded : Icons.add_rounded,
+                            color: inStock
+                                ? (inCart
+                                    ? AppTheme.primaryColor
+                                    : Colors.white)
+                                : Colors.grey.shade400,
+                            size: 18,
                           ),
                         ),
+                      ),
                     ],
                   ),
                 ],
@@ -888,6 +986,11 @@ class ProductGridCard extends StatelessWidget {
                       ),
                     ),
                   ),
+                Positioned(
+                  top: 8,
+                  right: 8,
+                  child: _WishlistButton(product: product),
+                ),
               ],
             ),
           ),
@@ -1076,6 +1179,48 @@ class _ErrorView extends StatelessWidget {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _WishlistButton extends StatelessWidget {
+  final Map<String, dynamic> product;
+  const _WishlistButton({required this.product});
+
+  @override
+  Widget build(BuildContext context) {
+    final wishlistProvider = Provider.of<WishlistProvider>(context);
+    final bool isLoved = wishlistProvider.isLoved(product['id']);
+
+    return GestureDetector(
+      onTap: () {
+        wishlistProvider.toggleWishlist({
+          'id': product['id'],
+          'name': product['name'],
+          'price': product['price'] ?? product['formatted_price'] ?? 0,
+          'main_image': product['main_image'],
+          'in_stock': product['in_stock'],
+        });
+      },
+      child: Container(
+        padding: const EdgeInsets.all(6),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          shape: BoxShape.circle,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.08),
+              blurRadius: 4,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Icon(
+          isLoved ? Icons.favorite_rounded : Icons.favorite_border_rounded,
+          size: 16,
+          color: isLoved ? AppTheme.primaryColor : Colors.grey.shade400,
         ),
       ),
     );
