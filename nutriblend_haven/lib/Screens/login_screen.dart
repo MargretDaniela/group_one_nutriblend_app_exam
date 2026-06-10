@@ -135,18 +135,15 @@ class _LoginScreenState extends State<LoginScreen>
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(24),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.white.withOpacity(0.30),
-                        blurRadius: 28,
-                        offset: const Offset(0, 10),
-                      ),
-                    ],
                   ),
-                  child: const Icon(
-                    Icons.eco_rounded,
-                    color: AppTheme.primaryColor,
-                    size: 38,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(24),
+                    child: Image.asset(
+                      'assets/logo.png',
+                      width: 80,
+                      height: 80,
+                      fit: BoxFit.cover,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 24),
@@ -240,8 +237,9 @@ class _LoginScreenState extends State<LoginScreen>
                             ),
                           ),
                           validator: (v) {
-                            if (v == null || v.isEmpty)
+                            if (v == null || v.isEmpty) {
                               return 'Password is required';
+                            }
                             return null;
                           },
                         ),

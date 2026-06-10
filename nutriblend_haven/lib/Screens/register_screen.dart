@@ -219,13 +219,21 @@ class _RegisterScreenState extends State<RegisterScreen>
   Widget _buildBrand() {
     return Row(
       children: [
-        ClipRRect(
-          borderRadius: BorderRadius.circular(14),
-          child: Image.asset(
-            'assets/logo.png',
-            width: 44,
-            height: 44,
-            fit: BoxFit.cover,
+        Container(
+          width: 44,
+          height: 44,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(14),
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(14),
+            child: Image.asset(
+              'assets/logo.png',
+              width: 44,
+              height: 44,
+              fit: BoxFit.cover,
+            ),
           ),
         ),
         const SizedBox(width: 12),

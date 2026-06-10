@@ -80,9 +80,13 @@ class _SplashScreenState extends State<SplashScreen>
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
-        child: Column(
-          children: [
-            const Spacer(flex: 3),
+        child: SizedBox(
+          width: double.infinity,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              const Spacer(flex: 3),
             // Logo
             AnimatedBuilder(
               animation: _logoController,
@@ -92,22 +96,14 @@ class _SplashScreenState extends State<SplashScreen>
                   scale: _logoScale.value,
                   child: Column(
                     children: [
-                      Container(
-                        width: 80,
-                        height: 80,
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF00A651),
-                          borderRadius: BorderRadius.circular(24),
-                          boxShadow: [
-                            BoxShadow(
-                              color: const Color(0xFF00A651).withOpacity(0.30),
-                              blurRadius: 28,
-                              offset: const Offset(0, 10),
-                            ),
-                          ],
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(24),
+                        child: Image.asset(
+                          'assets/logo.png',
+                          width: 80,
+                          height: 80,
+                          fit: BoxFit.cover,
                         ),
-                        child: const Icon(Icons.eco_rounded,
-                            color: Colors.white, size: 38),
                       ),
                     ],
                   ),
@@ -158,6 +154,7 @@ class _SplashScreenState extends State<SplashScreen>
             ),
             const SizedBox(height: 48),
           ],
+        ),
         ),
       ),
     );
