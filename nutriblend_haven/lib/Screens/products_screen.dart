@@ -1,33 +1,37 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
-import '../models/product_model.dart';
 import '../providers/cart_provider.dart';
-import '../utils/constants.dart';
+import '../services/product_service.dart';
 import '../utils/theme.dart';
-import '../widgets/reusable_widgets.dart';
+import 'home_screen.dart';
 
 class ProductsScreen extends StatefulWidget {
-  const ProductsScreen({Key? key}) : super(key: key);
+  const ProductsScreen({super.key});
 
   @override
-  _ProductsScreenState createState() => _ProductsScreenState();
+  State<ProductsScreen> createState() => _ProductsScreenState();
 }
 
 class _ProductsScreenState extends State<ProductsScreen> {
-  List<Product> _products = [];
-  List<Product> _filteredProducts = [];
-  String _selectedCategory = 'All';
+  List<dynamic> _products = [];
+  List<dynamic> _categories = [
+    {'id': null, 'name': 'All'}
+  ];
+  int? _selectedCategoryId;
+  bool _catsLoaded = false;
   bool _isLoading = true;
-  bool _hasError = false;
+  String? _error;
+  int _currentPage = 1;
+  int _lastPage = 1;
+  String _search = '';
   final TextEditingController _searchController = TextEditingController();
-
-  static const List<String> _allCategories = ['All', ...AppConstants.categories];
 
   @override
   void initState() {
     super.initState();
-    _loadProducts();
+    _loadCategories();
+    _loadPage(1);
   }
 
   @override
@@ -36,329 +40,276 @@ class _ProductsScreenState extends State<ProductsScreen> {
     super.dispose();
   }
 
-  void _loadProducts() {
+  Future<void> _loadCategories() async {
+    if (_catsLoaded) return;
+    try {
+      final res = await ProductService.fetchProducts(perPage: 100);
+      final all = res['products'] as List;
+      final seen = <int>{};
+      final cats = <Map<String, dynamic>>[
+        {'id': null, 'name': 'All'}
+      ];
+      for (final p in all) {
+        final cat = p['category'];
+        if (cat != null) {
+          final id = cat['id'] as int;
+          if (seen.add(id)) cats.add({'id': id, 'name': cat['name']});
+        }
+      }
+      cats.sort((a, b) => a['name'] == 'All'
+          ? -1
+          : (a['name'] as String).compareTo(b['name'] as String));
+      if (mounted) {
+        setState(() {
+          _categories = cats;
+          _catsLoaded = true;
+        });
+      }
+    } catch (_) {}
+  }
+
+  Future<void> _loadPage(int page) async {
+    if (_isLoading && page != 1) return;
     setState(() {
       _isLoading = true;
-      _hasError = false;
+      _error = null;
     });
-
-    Future.delayed(const Duration(seconds: 2), () {
+    try {
+      final res = await ProductService.fetchProducts(
+        page: page,
+        perPage: 12,
+        search: _search,
+        categoryId: _selectedCategoryId,
+      );
       if (!mounted) return;
       setState(() {
-        _products = _getMockProducts();
-        _filteredProducts = _products;
+        _products = res['products'] as List;
+        _currentPage = page;
+        _lastPage = res['lastPage'] as int;
         _isLoading = false;
       });
-    });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _error = 'Could not load products. Check your connection.';
+        _isLoading = false;
+      });
+    }
   }
 
-  List<Product> _getMockProducts() {
-    return [
-      Product(
-        id: 1,
-        name: 'Organic Vitamin C',
-        price: 25000,
-        imageUrl: 'https://via.placeholder.com/200x150?text=Vitamin+C',
-        description: 'Premium quality Vitamin C supplements',
-        category: 'Vitamins',
-      ),
-      Product(
-        id: 2,
-        name: 'Whey Protein',
-        price: 45000,
-        imageUrl: 'https://via.placeholder.com/200x150?text=Whey+Protein',
-        description: 'Pure whey protein for muscle building',
-        category: 'Protein',
-      ),
-      Product(
-        id: 3,
-        name: 'Organic Greens',
-        price: 35000,
-        imageUrl: 'https://via.placeholder.com/200x150?text=Organic+Greens',
-        description: 'Organic superfood blend',
-        category: 'Organic',
-      ),
-      Product(
-        id: 4,
-        name: 'Multivitamin',
-        price: 30000,
-        imageUrl: 'https://via.placeholder.com/200x150?text=Multivitamin',
-        description: 'Complete daily multivitamin',
-        category: 'Vitamins',
-      ),
-      Product(
-        id: 5,
-        name: 'Collagen',
-        price: 55000,
-        imageUrl: 'https://via.placeholder.com/200x150?text=Collagen',
-        description: 'Hydrolyzed collagen peptides',
-        category: 'Beauty',
-      ),
-      Product(
-        id: 6,
-        name: 'Turmeric',
-        price: 20000,
-        imageUrl: 'https://via.placeholder.com/200x150?text=Turmeric',
-        description: 'Organic turmeric root extract',
-        category: 'Herbal',
-      ),
-    ];
+  void _doSearch(String v) {
+    setState(() => _search = v);
+    _loadPage(1);
   }
 
-  void _searchProducts(String query) {
-    setState(() {
-      _filteredProducts = _products.where((product) {
-        final matchesQuery =
-            product.name.toLowerCase().contains(query.toLowerCase());
-        final matchesCategory = _selectedCategory == 'All' ||
-            product.category == _selectedCategory;
-        return matchesQuery && matchesCategory;
-      }).toList();
-    });
-  }
-
-  void _filterByCategory(String category) {
-    setState(() {
-      _selectedCategory = category;
-      final query = _searchController.text;
-      _filteredProducts = _products.where((product) {
-        final matchesQuery =
-            product.name.toLowerCase().contains(query.toLowerCase());
-        final matchesCategory =
-            category == 'All' || product.category == category;
-        return matchesQuery && matchesCategory;
-      }).toList();
-    });
+  void _selectCategory(int? id) {
+    setState(() => _selectedCategoryId = id);
+    _loadPage(1);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.backgroundColor,
-      appBar: AppBar(
-        backgroundColor: AppTheme.primaryColor,
-        foregroundColor: Colors.white,
-        elevation: 0,
-        title: Text(
-          'Products',
-          style: GoogleFonts.playfairDisplay(
-            fontSize: 20,
-            fontWeight: FontWeight.w700,
-            color: Colors.white,
-          ),
-        ),
-      ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-            child: SearchBarWidget(
-              controller: _searchController,
-              onSearch: _searchProducts,
+      backgroundColor: const Color(0xFFF5F5F0),
+      body: CustomScrollView(
+        slivers: [
+          _buildAppBar(),
+          SliverToBoxAdapter(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 16),
+                _buildSearchBar(),
+                const SizedBox(height: 12),
+                _buildCategoryRow(),
+                const SizedBox(height: 16),
+                _buildSectionHeader(
+                  'All Products',
+                  trailing: _lastPage > 1
+                      ? Text(
+                          'Page $_currentPage of $_lastPage',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 12,
+                            color: const Color(0xFF9E9E9E),
+                          ),
+                        )
+                      : null,
+                ),
+                const SizedBox(height: 12),
+              ],
             ),
           ),
-          const SizedBox(height: 12),
-          _buildCategoryFilters(),
-          const SizedBox(height: 12),
-          Expanded(
-            child: _isLoading
-                ? _buildShimmerGrid()
-                : _hasError
-                    ? _buildErrorState()
-                    : _filteredProducts.isEmpty
-                        ? _buildEmptyState()
-                        : _buildProductGrid(),
-          ),
+          _buildProductsSliver(),
+          if (_products.isNotEmpty && !_isLoading && _lastPage > 1)
+            SliverToBoxAdapter(child: _buildPagination()),
+          const SliverToBoxAdapter(child: SizedBox(height: 32)),
         ],
       ),
     );
   }
 
-  Widget _buildShimmerGrid() {
-    return GridView.builder(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        childAspectRatio: 0.72,
-        crossAxisSpacing: 12,
-        mainAxisSpacing: 12,
+  Widget _buildAppBar() {
+    return SliverAppBar(
+      pinned: true,
+      backgroundColor: Colors.white,
+      elevation: 0,
+      titleSpacing: 16,
+      title: Row(
+        children: [
+          Container(
+            width: 34,
+            height: 34,
+            decoration: BoxDecoration(
+              color: AppTheme.primaryColor,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: const Icon(
+              Icons.local_florist_rounded,
+              color: Colors.white,
+              size: 18,
+            ),
+          ),
+          const SizedBox(width: 10),
+          Text(
+            'Products',
+            style: GoogleFonts.playfairDisplay(
+              fontSize: 18,
+              fontWeight: FontWeight.w800,
+              color: const Color(0xFF1B5E20),
+            ),
+          ),
+        ],
       ),
-      itemCount: 6,
-      itemBuilder: (_, __) => ShimmerEffect(
-        child: Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
+      actions: [
+        IconButton(
+          onPressed: () {
+            _loadCategories();
+            _loadPage(1);
+          },
+          icon: Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              color: const Color(0xFFF1F8E9),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: const Icon(
+              Icons.refresh_rounded,
+              color: AppTheme.primaryColor,
+              size: 20,
+            ),
           ),
         ),
+        const SizedBox(width: 8),
+      ],
+      bottom: PreferredSize(
+        preferredSize: const Size.fromHeight(0.5),
+        child: Container(height: 0.5, color: Colors.grey.shade200),
       ),
     );
   }
 
-  Widget _buildErrorState() {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              width: 80,
-              height: 80,
-              decoration: BoxDecoration(
-                color: Colors.red.withOpacity(0.08),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                Icons.wifi_off_rounded,
-                size: 40,
-                color: Colors.red.withOpacity(0.6),
-              ),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Something went wrong',
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: AppTheme.textPrimary,
-              ),
-            ),
-            const SizedBox(height: 6),
-            Text(
-              'Could not load products. Check your connection and try again.',
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 13,
-                color: AppTheme.textSecondary,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton.icon(
-              onPressed: _loadProducts,
-              icon: const Icon(Icons.refresh_rounded, size: 16),
-              label: Text(
-                'Try Again',
-                style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w600),
-              ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppTheme.primaryColor,
-                foregroundColor: Colors.white,
-                elevation: 0,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 24,
-                  vertical: 12,
-                ),
-              ),
+  Widget _buildSearchBar() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 14),
+      child: Container(
+        height: 48,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(color: Colors.grey.shade200),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.04),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildEmptyState() {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: Row(
           children: [
-            Container(
-              width: 80,
-              height: 80,
-              decoration: BoxDecoration(
-                color: AppTheme.primaryColor.withOpacity(0.08),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                Icons.search_off_rounded,
-                size: 40,
-                color: AppTheme.primaryColor.withOpacity(0.4),
-              ),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'No products found',
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: AppTheme.textPrimary,
-              ),
-            ),
-            const SizedBox(height: 6),
-            Text(
-              'Try adjusting your search or selected category.',
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 13,
-                color: AppTheme.textSecondary,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            if (_selectedCategory != 'All') ...[
-              const SizedBox(height: 16),
-              TextButton(
-                onPressed: () => _filterByCategory('All'),
-                child: Text(
-                  'Clear Filter',
-                  style: GoogleFonts.plusJakartaSans(
-                    color: AppTheme.primaryColor,
-                    fontWeight: FontWeight.w600,
+            Icon(Icons.search_rounded, color: Colors.grey.shade400, size: 20),
+            const SizedBox(width: 10),
+            Expanded(
+              child: TextField(
+                controller: _searchController,
+                textInputAction: TextInputAction.search,
+                onSubmitted: _doSearch,
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 14,
+                  color: Colors.black87,
+                ),
+                decoration: InputDecoration(
+                  hintText: 'Search supplements...',
+                  hintStyle: GoogleFonts.plusJakartaSans(
+                    color: Colors.grey.shade400,
+                    fontSize: 14,
                   ),
+                  border: InputBorder.none,
+                  isDense: true,
                 ),
               ),
-            ],
+            ),
+            if (_search.isNotEmpty)
+              GestureDetector(
+                onTap: () {
+                  _searchController.clear();
+                  _doSearch('');
+                },
+                child: Icon(Icons.close_rounded,
+                    color: Colors.grey.shade400, size: 18),
+              ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildCategoryFilters() {
+  Widget _buildCategoryRow() {
     return SizedBox(
       height: 38,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        itemCount: _allCategories.length,
-        itemBuilder: (context, index) {
-          final category = _allCategories[index];
-          final isSelected = _selectedCategory == category;
-
-          return GestureDetector(
-            onTap: () => _filterByCategory(category),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              margin: const EdgeInsets.only(right: 8),
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-              decoration: BoxDecoration(
-                color: isSelected ? AppTheme.primaryColor : Colors.white,
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(
-                  color: isSelected
-                      ? AppTheme.primaryColor
-                      : const Color(0xFFE5E7EB),
+        padding: const EdgeInsets.symmetric(horizontal: 14),
+        itemCount: _categories.length,
+        itemBuilder: (_, i) {
+          final cat = _categories[i];
+          final sel = _selectedCategoryId == cat['id'];
+          return Padding(
+            padding: const EdgeInsets.only(right: 8),
+            child: GestureDetector(
+              onTap: () => _selectCategory(cat['id'] as int?),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 180),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
                 ),
-                boxShadow: isSelected
-                    ? [
-                        BoxShadow(
-                          color: AppTheme.primaryColor.withOpacity(0.25),
-                          blurRadius: 8,
-                          offset: const Offset(0, 2),
-                        ),
-                      ]
-                    : [],
-              ),
-              child: Text(
-                category,
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 13,
-                  fontWeight:
-                      isSelected ? FontWeight.w600 : FontWeight.w400,
-                  color: isSelected ? Colors.white : AppTheme.textSecondary,
+                decoration: BoxDecoration(
+                  color: sel ? AppTheme.primaryColor : Colors.white,
+                  borderRadius: BorderRadius.circular(22),
+                  border: Border.all(
+                    color: sel ? AppTheme.primaryColor : Colors.grey.shade200,
+                    width: sel ? 0 : 1,
+                  ),
+                  boxShadow: sel
+                      ? [
+                          BoxShadow(
+                            color: AppTheme.primaryColor.withOpacity(0.25),
+                            blurRadius: 8,
+                            offset: const Offset(0, 3),
+                          )
+                        ]
+                      : [],
+                ),
+                child: Text(
+                  cat['name'] as String,
+                  style: GoogleFonts.plusJakartaSans(
+                    color: sel ? Colors.white : Colors.black87,
+                    fontWeight: sel ? FontWeight.w700 : FontWeight.w500,
+                    fontSize: 13,
+                  ),
                 ),
               ),
             ),
@@ -368,43 +319,255 @@ class _ProductsScreenState extends State<ProductsScreen> {
     );
   }
 
-  Widget _buildProductGrid() {
-    return GridView.builder(
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        childAspectRatio: 0.72,
-        crossAxisSpacing: 12,
-        mainAxisSpacing: 12,
+  Widget _buildSectionHeader(String title, {Widget? trailing}) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 0, 14, 0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Text(
+            title,
+            style: GoogleFonts.playfairDisplay(
+              fontSize: 18,
+              fontWeight: FontWeight.w800,
+              color: Colors.black87,
+            ),
+          ),
+          if (trailing != null) trailing,
+        ],
       ),
-      itemCount: _filteredProducts.length,
-      itemBuilder: (context, index) {
-        return ProductCard(
-          product: _filteredProducts[index],
-          onAddToCart: (product) {
-            Provider.of<CartProvider>(context, listen: false).addToCart({
-              'id': product.id,
-              'name': product.name,
-              'price': product.price,
-            });
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                  '${product.name} added to cart',
-                  style: GoogleFonts.plusJakartaSans(fontSize: 13),
+    );
+  }
+
+  Widget _buildProductsSliver() {
+    if (_isLoading) {
+      return SliverPadding(
+        padding: const EdgeInsets.fromLTRB(14, 0, 14, 0),
+        sliver: SliverGrid(
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            mainAxisSpacing: 12,
+            crossAxisSpacing: 12,
+            childAspectRatio: 0.68,
+          ),
+          delegate: SliverChildBuilderDelegate(
+            (_, __) => _ShimmerCard(),
+            childCount: 6,
+          ),
+        ),
+      );
+    }
+
+    if (_error != null) {
+      return SliverFillRemaining(
+        child: _ErrorView(
+          message: _error!,
+          onRetry: () => _loadPage(_currentPage),
+        ),
+      );
+    }
+
+    if (_products.isEmpty) {
+      return SliverFillRemaining(
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                width: 72,
+                height: 72,
+                decoration: BoxDecoration(
+                  color: AppTheme.primaryColor.withOpacity(0.08),
+                  shape: BoxShape.circle,
                 ),
-                backgroundColor: AppTheme.primaryColor,
-                behavior: SnackBarBehavior.floating,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
+                child: Icon(
+                  Icons.search_off_rounded,
+                  size: 36,
+                  color: AppTheme.primaryColor.withOpacity(0.4),
                 ),
-                margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                duration: const Duration(seconds: 2),
               ),
-            );
-          },
-        );
-      },
+              const SizedBox(height: 16),
+              Text(
+                'No products found',
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black54,
+                ),
+              ),
+              if (_search.isNotEmpty || _selectedCategoryId != null) ...[
+                const SizedBox(height: 12),
+                TextButton(
+                  onPressed: () {
+                    _searchController.clear();
+                    setState(() {
+                      _search = '';
+                      _selectedCategoryId = null;
+                    });
+                    _loadPage(1);
+                  },
+                  child: Text(
+                    'Clear filters',
+                    style: GoogleFonts.plusJakartaSans(
+                      color: AppTheme.primaryColor,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+      );
+    }
+
+    return SliverPadding(
+      padding: const EdgeInsets.fromLTRB(14, 0, 14, 0),
+      sliver: SliverGrid(
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          mainAxisSpacing: 12,
+          crossAxisSpacing: 12,
+          childAspectRatio: 0.68,
+        ),
+        delegate: SliverChildBuilderDelegate(
+          (_, i) => ProductGridCard(product: _products[i]),
+          childCount: _products.length,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPagination() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 24),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          _pageBtn(
+            Icons.chevron_left,
+            _currentPage > 1 ? () => _loadPage(_currentPage - 1) : null,
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Text(
+              '$_currentPage / $_lastPage',
+              style: GoogleFonts.plusJakartaSans(
+                fontWeight: FontWeight.w700,
+                fontSize: 14,
+                color: Colors.black87,
+              ),
+            ),
+          ),
+          _pageBtn(
+            Icons.chevron_right,
+            _currentPage < _lastPage
+                ? () => _loadPage(_currentPage + 1)
+                : null,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _pageBtn(IconData icon, VoidCallback? onTap) {
+    final active = onTap != null;
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 44,
+        height: 44,
+        decoration: BoxDecoration(
+          color: active ? AppTheme.primaryColor : Colors.grey.shade200,
+          borderRadius: BorderRadius.circular(14),
+        ),
+        child: Icon(
+          icon,
+          color: active ? Colors.white : Colors.grey.shade400,
+          size: 22,
+        ),
+      ),
+    );
+  }
+}
+
+class _ShimmerCard extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.grey.shade100,
+        borderRadius: BorderRadius.circular(18),
+      ),
+    );
+  }
+}
+
+class _ErrorView extends StatelessWidget {
+  final String message;
+  final VoidCallback onRetry;
+  const _ErrorView({required this.message, required this.onRetry});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 72,
+              height: 72,
+              decoration: BoxDecoration(
+                color: Colors.grey.shade100,
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Icon(Icons.wifi_off_rounded,
+                  size: 36, color: Colors.grey.shade400),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Connection Error',
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 17,
+                fontWeight: FontWeight.w700,
+                color: Colors.black87,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              message,
+              textAlign: TextAlign.center,
+              style: GoogleFonts.plusJakartaSans(
+                color: Colors.grey.shade500,
+                fontSize: 13,
+              ),
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton.icon(
+              onPressed: onRetry,
+              icon: const Icon(Icons.refresh_rounded, size: 18),
+              label: Text(
+                'Try Again',
+                style:
+                    GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w600),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppTheme.primaryColor,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 28, vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                elevation: 0,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

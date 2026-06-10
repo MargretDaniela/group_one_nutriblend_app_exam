@@ -1,9 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
-import '../providers/cart_provider.dart';
-import '../models/product_model.dart';
-import '../utils/constants.dart';
 import '../utils/theme.dart';
 
 class SearchBarWidget extends StatelessWidget {
@@ -11,10 +7,10 @@ class SearchBarWidget extends StatelessWidget {
   final Function(String) onSearch;
 
   const SearchBarWidget({
-    Key? key,
+    super.key,
     required this.controller,
     required this.onSearch,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -40,7 +36,7 @@ class SearchBarWidget extends StatelessWidget {
           color: AppTheme.textPrimary,
         ),
         decoration: InputDecoration(
-          hintText: AppConstants.searchPlaceholder,
+          hintText: 'Search vitamins, supplements...',
           hintStyle: GoogleFonts.plusJakartaSans(
             fontSize: 14,
             color: const Color(0xFF9CA3AF),
@@ -85,182 +81,13 @@ class SearchBarWidget extends StatelessWidget {
   }
 }
 
-class ProductCard extends StatelessWidget {
-  final Product product;
-  final Function(Product) onAddToCart;
-
-  const ProductCard({
-    Key? key,
-    required this.product,
-    required this.onAddToCart,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    final cartProvider = Provider.of<CartProvider>(context);
-    final inCart = cartProvider.isInCart(product.id);
-
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Stack(
-            children: [
-              ClipRRect(
-                borderRadius:
-                    const BorderRadius.vertical(top: Radius.circular(16)),
-                child: product.imageUrl != null && product.imageUrl!.isNotEmpty
-                    ? Image.network(
-                        product.imageUrl!,
-                        height: 118,
-                        width: double.infinity,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => _imagePlaceholder(),
-                      )
-                    : _imagePlaceholder(),
-              ),
-              if (product.category != null)
-                Positioned(
-                  top: 8,
-                  left: 8,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 3,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.black.withOpacity(0.55),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Text(
-                      product.category!,
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 10,
-                        fontWeight: FontWeight.w500,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                ),
-            ],
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  product.name,
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: const Color(0xFF1A1A2E),
-                  ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  _formatPrice(product.price),
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w700,
-                    color: AppTheme.primaryColor,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                SizedBox(
-                  width: double.infinity,
-                  height: 32,
-                  child: ElevatedButton(
-                    onPressed: inCart ? null : () => onAddToCart(product),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: inCart
-                          ? AppTheme.primaryColor.withOpacity(0.12)
-                          : AppTheme.primaryColor,
-                      foregroundColor:
-                          inCart ? AppTheme.primaryColor : Colors.white,
-                      elevation: 0,
-                      disabledBackgroundColor:
-                          AppTheme.primaryColor.withOpacity(0.12),
-                      disabledForegroundColor: AppTheme.primaryColor,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          inCart
-                              ? Icons.check_rounded
-                              : Icons.add_shopping_cart_rounded,
-                          size: 14,
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          inCart ? 'In Cart' : 'Add to Cart',
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _imagePlaceholder() {
-    return Container(
-      height: 118,
-      width: double.infinity,
-      color: const Color(0xFFE8F5E9),
-      child: const Icon(
-        Icons.local_pharmacy_outlined,
-        color: Color(0xFF4CAF50),
-        size: 40,
-      ),
-    );
-  }
-
-  String _formatPrice(dynamic price) {
-    final number = double.tryParse(price.toString()) ?? 0;
-    final formatted = number.toStringAsFixed(0);
-    final chars = formatted.split('');
-    final buffer = StringBuffer();
-    for (int i = 0; i < chars.length; i++) {
-      if (i > 0 && (chars.length - i) % 3 == 0) buffer.write(',');
-      buffer.write(chars[i]);
-    }
-    return 'UGX ${buffer.toString()}';
-  }
-}
-
 class ShimmerEffect extends StatefulWidget {
   final Widget child;
 
-  const ShimmerEffect({Key? key, required this.child}) : super(key: key);
+  const ShimmerEffect({super.key, required this.child});
 
   @override
-  _ShimmerEffectState createState() => _ShimmerEffectState();
+  State<ShimmerEffect> createState() => _ShimmerEffectState();
 }
 
 class _ShimmerEffectState extends State<ShimmerEffect>
@@ -324,13 +151,13 @@ class EmptyStateWidget extends StatelessWidget {
   final VoidCallback? onAction;
 
   const EmptyStateWidget({
-    Key? key,
+    super.key,
     required this.icon,
     required this.title,
     required this.subtitle,
     this.actionLabel,
     this.onAction,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

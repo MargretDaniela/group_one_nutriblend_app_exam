@@ -1,16 +1,11 @@
-import 'dart:convert';
-import 'dart:io';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
 import '../providers/cart_provider.dart';
+import '../services/product_service.dart';
 import '../utils/theme.dart';
 import 'main_screen.dart';
-
-const _baseUrl = 'https://admin.rasmuspharmaceuticals.com/api/v1';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -20,7 +15,6 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  //  State 
   List<dynamic> _products = [];
   List<dynamic> _categories = [
     {'id': null, 'name': 'All'}
@@ -34,7 +28,6 @@ class _HomeScreenState extends State<HomeScreen> {
   String _search = '';
   final TextEditingController _searchController = TextEditingController();
 
-  //  Lifecycle 
   @override
   void initState() {
     super.initState();
@@ -48,43 +41,10 @@ class _HomeScreenState extends State<HomeScreen> {
     super.dispose();
   }
 
-  // API helpers 
-  Future<Map<String, dynamic>> _fetchProducts({
-    int page = 1,
-    int? perPage,
-    String? search,
-    int? categoryId,
-  }) async {
-    String target = '$_baseUrl/products?page=$page';
-    if (perPage != null) target += '&per_page=$perPage';
-    if (search != null && search.isNotEmpty) target += '&search=$search';
-    if (categoryId != null) target += '&category_id=$categoryId';
-
-    final url = kIsWeb ? 'https://corsproxy.io/?$target' : target;
-
-    final response = await http
-        .get(
-          Uri.parse(url),
-          headers: const {'User-Agent': 'NutriBlendApp/1.0 (Flutter)'},
-        )
-        .timeout(const Duration(seconds: 30));
-
-    if (response.statusCode == 200) {
-      final body = jsonDecode(response.body) as Map<String, dynamic>;
-      return {
-        'products': body['data'] as List,
-        'total': body['meta']['total'] as int,
-        'lastPage': body['meta']['last_page'] as int,
-      };
-    } else {
-      throw HttpException('Server error: ${response.statusCode}');
-    }
-  }
-
   Future<void> _loadCategories() async {
     if (_catsLoaded) return;
     try {
-      final res = await _fetchProducts(perPage: 100);
+      final res = await ProductService.fetchProducts(perPage: 100);
       final all = res['products'] as List;
       final seen = <int>{};
       final cats = <Map<String, dynamic>>[
@@ -116,7 +76,7 @@ class _HomeScreenState extends State<HomeScreen> {
       _error = null;
     });
     try {
-      final res = await _fetchProducts(
+      final res = await ProductService.fetchProducts(
         page: page,
         perPage: 12,
         search: _search,
@@ -152,7 +112,6 @@ class _HomeScreenState extends State<HomeScreen> {
     context.findAncestorStateOfType<MainScreenState>()?.switchTab(2);
   }
 
-  // Build
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -201,7 +160,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  //  App bar
   Widget _buildAppBar() {
     return SliverAppBar(
       pinned: true,
@@ -322,7 +280,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  //  Hero banner
   Widget _buildHero() {
     return Container(
       margin: const EdgeInsets.fromLTRB(14, 14, 14, 0),
@@ -422,7 +379,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  //  Search bar
   Widget _buildSearchBar() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 14),
@@ -480,7 +436,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  //  Category chips
   Widget _buildCategoryRow() {
     return SizedBox(
       height: 38,
@@ -505,8 +460,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   color: sel ? AppTheme.primaryColor : Colors.white,
                   borderRadius: BorderRadius.circular(22),
                   border: Border.all(
-                    color:
-                        sel ? AppTheme.primaryColor : Colors.grey.shade200,
+                    color: sel ? AppTheme.primaryColor : Colors.grey.shade200,
                     width: sel ? 0 : 1,
                   ),
                   boxShadow: sel
@@ -535,7 +489,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  //  Section header
   Widget _buildSectionHeader(String title, {Widget? trailing}) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 0, 14, 0),
@@ -557,7 +510,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  //  Featured horizontal scroll
   Widget _buildFeaturedScroll() {
     final featured = _products.take(6).toList();
     return SizedBox(
@@ -571,7 +523,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  //  Products grid (sliver) 
   Widget _buildProductsSliver() {
     if (_isLoading) {
       return SliverPadding(
@@ -664,14 +615,13 @@ class _HomeScreenState extends State<HomeScreen> {
           childAspectRatio: 0.68,
         ),
         delegate: SliverChildBuilderDelegate(
-          (_, i) => _ProductGridCard(product: _products[i]),
+          (_, i) => ProductGridCard(product: _products[i]),
           childCount: _products.length,
         ),
       ),
     );
   }
 
- 
   Widget _buildPagination() {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 24),
@@ -725,7 +675,6 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-//  Featured card 
 class _FeaturedCard extends StatelessWidget {
   final Map<String, dynamic> product;
   const _FeaturedCard({required this.product});
@@ -848,10 +797,9 @@ class _FeaturedCard extends StatelessWidget {
   }
 }
 
-//  Product grid card 
-class _ProductGridCard extends StatelessWidget {
+class ProductGridCard extends StatelessWidget {
   final Map<String, dynamic> product;
-  const _ProductGridCard({required this.product});
+  const ProductGridCard({super.key, required this.product});
 
   static const _bgs = [
     Color(0xFFF1F8E9),
@@ -1050,7 +998,6 @@ class _ProductGridCard extends StatelessWidget {
   }
 }
 
-//  Shimmer placeholder card 
 class _ShimmerCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -1067,7 +1014,6 @@ class _ShimmerCard extends StatelessWidget {
   }
 }
 
-//  Error view 
 class _ErrorView extends StatelessWidget {
   final String message;
   final VoidCallback onRetry;
