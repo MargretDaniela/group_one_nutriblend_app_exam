@@ -7,6 +7,7 @@ import '../services/product_service.dart';
 import '../utils/theme.dart';
 import 'home_screen.dart';
 import 'wishlist_screen.dart';
+import 'product_detail_screen.dart';
 
 class ProductsScreen extends StatefulWidget {
   const ProductsScreen({super.key});
@@ -482,7 +483,15 @@ class _ProductsScreenState extends State<ProductsScreen> {
           childAspectRatio: 0.68,
         ),
         delegate: SliverChildBuilderDelegate(
-          (_, i) => ProductGridCard(product: _products[i]),
+          (_, i) => GestureDetector(
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => ProductDetailScreen(product: _products[i]),
+              ),
+            ),
+            child: ProductGridCard(product: _products[i]),
+          ),
           childCount: _products.length,
         ),
       ),

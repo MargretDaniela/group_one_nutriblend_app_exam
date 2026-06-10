@@ -8,6 +8,7 @@ import '../services/product_service.dart';
 import '../utils/theme.dart';
 import 'main_screen.dart';
 import 'wishlist_screen.dart';
+import 'product_detail_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -749,7 +750,14 @@ class _FeaturedCard extends StatelessWidget {
     final bg = _bgs[id % _bgs.length];
     final inCart = cartProvider.isInCart(id);
 
-    return Container(
+    return GestureDetector(
+      onTap: () => Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => ProductDetailScreen(product: product),
+        ),
+      ),
+      child: Container(
       width: 148,
       height: 200,
       margin: const EdgeInsets.only(right: 12),
@@ -891,6 +899,7 @@ class _FeaturedCard extends StatelessWidget {
           ),
         ],
       ),
+      ),
     );
   }
 }
@@ -917,7 +926,14 @@ class ProductGridCard extends StatelessWidget {
     final bg = _bgs[id % _bgs.length];
     final inCart = cartProvider.isInCart(id);
 
-    return Container(
+    return GestureDetector(
+      onTap: () => Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => ProductDetailScreen(product: product),
+        ),
+      ),
+      child: Container(
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(18),
