@@ -3,8 +3,9 @@ import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
+import 'providers/auth_provider.dart';
 import 'providers/cart_provider.dart';
-import 'screens/splash_screen.dart';
+import 'Screens/splash_screen.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -24,8 +25,11 @@ void main() {
   ]);
 
   runApp(
-    ChangeNotifierProvider(
-      create: (_) => CartProvider(),
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => AuthProvider()),
+        ChangeNotifierProvider(create: (_) => CartProvider()),
+      ],
       child: const NutriBlendApp(),
     ),
   );

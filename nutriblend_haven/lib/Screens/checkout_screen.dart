@@ -26,9 +26,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   List<dynamic> _towns = [];
 
   int? _selectedRegionId;
-  String? _selectedRegionName;
   int? _selectedTownId;
-  String? _selectedTownName;
   String _deliveryMethod = 'delivery';
 
   bool _loadingRegions = false;
@@ -77,7 +75,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       _loadingTowns = true;
       _towns = [];
       _selectedTownId = null;
-      _selectedTownName = null;
     });
 
     try {
@@ -634,12 +631,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           }).toList(),
           onChanged: (value) {
             if (value == null) return;
-            final region = _regions.firstWhere((r) => r['id'] == value);
+            _regions.firstWhere((r) => r['id'] == value);
             setState(() {
               _selectedRegionId = value;
-              _selectedRegionName = region['name'];
               _selectedTownId = null;
-              _selectedTownName = null;
               _towns = [];
             });
             _fetchTowns(value);
@@ -696,11 +691,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                     ? null
                     : (value) {
                         if (value == null) return;
-                        final town =
-                            _towns.firstWhere((t) => t['id'] == value);
+                        _towns.firstWhere((t) => t['id'] == value);
                         setState(() {
                           _selectedTownId = value;
-                          _selectedTownName = town['name'];
                         });
                       },
                 validator: (value) {
