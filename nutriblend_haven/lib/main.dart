@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
 import 'providers/auth_provider.dart';
 import 'providers/cart_provider.dart';
-import 'Screens/splash_screen.dart';
+import 'providers/wishlist_provider.dart';
+import 'screens/splash_screen.dart';
+import 'utils/theme.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -29,6 +30,7 @@ void main() {
       providers: [
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => CartProvider()),
+        ChangeNotifierProvider(create: (_) => WishlistProvider()),
       ],
       child: const NutriBlendApp(),
     ),
@@ -43,14 +45,7 @@ class NutriBlendApp extends StatelessWidget {
     return MaterialApp(
       title: 'NutriBlend',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        useMaterial3: true,
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF4CAF50),
-          primary: const Color(0xFF2E7D32),
-        ),
-        textTheme: GoogleFonts.plusJakartaSansTextTheme(),
-      ),
+      theme: AppTheme.lightTheme,
       home: const SplashScreen(),
     );
   }

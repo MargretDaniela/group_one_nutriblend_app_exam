@@ -1,81 +1,75 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class AppTheme {
-  // Modern green color palette
-  static const primaryColor = Color(0xFF00C853); // Modern green
-  static const primaryLight = Color(0xFF69F0AE); // Light green
-  static const primaryDark = Color(0xFF007E33); // Dark green
-  static const accentColor = Color(0xFF00BFA5); // Teal accent
-  static const backgroundColor = Color(0xFFF1F8E9); // Light green background
-  static const cardColor = Colors.white;
-  static const textPrimary = Color(0xFF212121);
-  static const textSecondary = Color(0xFF757575);
-  static const shadowColor = Color(0x1A000000);
-  static const dividerColor = Color(0xFFBDBDBD);
-  static const shimmerBase = Color(0xFFE0E0E0);
-  static const shimmerHighlight = Color(0xFFF5F5F5);
-  static const successColor = Color(0xFF4CAF50);
-  static const errorColor = Color(0xFFE53935);
-  static const warningColor = Color(0xFFFB8C00);
+  // Bright, vivid green palette
+  static const primaryColor   = Color(0xFF00C853); // vivid green
+  static const primaryDark    = Color(0xFF00A040); // deeper green
+  static const primaryLight   = Color(0xFF69F0AE); // bright mint
+  static const accent         = Color(0xFFB9F6CA); // soft mint fill
+  static const accentDeep     = Color(0xFF00E676); // neon-ish accent
+  static const scaffold       = Color(0xFFF3FFF7); // very light green tint
+  static const cardColor      = Colors.white;
+  static const textPrimary    = Color(0xFF0D2B1A);
+  static const textSecondary  = Color(0xFF5A7568);
+  static const divider        = Color(0xFFDCF5E4);
 
   static ThemeData get lightTheme {
     return ThemeData(
+      useMaterial3: true,
       primaryColor: primaryColor,
-      scaffoldBackgroundColor: backgroundColor,
-      cardColor: cardColor,
-      textTheme: const TextTheme(
-        titleLarge: TextStyle(
-          color: textPrimary,
-          fontWeight: FontWeight.bold,
-          fontSize: 20,
-        ),
-        bodyMedium: TextStyle(
-          color: textPrimary,
-          fontSize: 16,
-        ),
-        titleMedium: TextStyle(
-          color: textSecondary,
-          fontSize: 14,
-        ),
+      scaffoldBackgroundColor: scaffold,
+      colorScheme: ColorScheme.fromSeed(
+        seedColor: primaryColor,
+        primary: primaryColor,
+        secondary: accentDeep,
+        brightness: Brightness.light,
       ),
-      appBarTheme: const AppBarTheme(
+      cardColor: cardColor,
+      textTheme: TextTheme(
+        headlineLarge: GoogleFonts.playfairDisplay(
+          fontSize: 30, fontWeight: FontWeight.w700, color: textPrimary),
+        titleLarge: GoogleFonts.playfairDisplay(
+          fontSize: 22, fontWeight: FontWeight.w700, color: textPrimary),
+        titleMedium: GoogleFonts.plusJakartaSans(
+          fontSize: 14, color: textSecondary),
+        bodyMedium: GoogleFonts.plusJakartaSans(
+          fontSize: 14, color: textPrimary),
+        labelSmall: GoogleFonts.plusJakartaSans(
+          fontSize: 11, color: textSecondary),
+      ),
+      appBarTheme: AppBarTheme(
         backgroundColor: primaryColor,
         elevation: 0,
-        iconTheme: IconThemeData(color: Colors.white),
-        titleTextStyle: TextStyle(
-          color: Colors.white,
-          fontWeight: FontWeight.bold,
-          fontSize: 20,
-        ),
+        iconTheme: const IconThemeData(color: Colors.white),
+        titleTextStyle: GoogleFonts.playfairDisplay(
+          fontSize: 20, fontWeight: FontWeight.w700, color: Colors.white),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: primaryColor,
+          foregroundColor: Colors.white,
           padding: const EdgeInsets.symmetric(vertical: 14),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
+            borderRadius: BorderRadius.circular(13)),
         ),
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: Colors.white,
+        fillColor: const Color(0xFFF0FFF4),
+        contentPadding:
+            const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: BorderSide.none,
-        ),
-        contentPadding: const EdgeInsets.symmetric(
-          vertical: 12,
-          horizontal: 16,
-        ),
-        hintStyle: TextStyle(color: textSecondary.withOpacity(0.7)),
-      ),
-      bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-        backgroundColor: Colors.white,
-        selectedItemColor: primaryColor,
-        unselectedItemColor: textSecondary,
-        type: BottomNavigationBarType.fixed,
-        elevation: 4,
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Color(0xFFB7E4C7))),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Color(0xFFB7E4C7))),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: primaryColor, width: 1.8)),
+        hintStyle: GoogleFonts.plusJakartaSans(
+          fontSize: 13, color: const Color(0xFF9CA3AF)),
       ),
     );
   }

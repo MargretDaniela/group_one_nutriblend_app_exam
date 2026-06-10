@@ -1,4 +1,4 @@
-// ignore_for_file: deprecated_member_use, unused_element
+
 
 import 'dart:convert';
 import 'package:flutter/material.dart';
@@ -7,6 +7,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'register_screen.dart';
 import 'main_screen.dart';
+import '../utils/constants.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -29,7 +30,7 @@ class _LoginScreenState extends State<LoginScreen>
   late Animation<Offset> _slideAnim;
 
   static const String _baseUrl =
-      'https://testing.rasmuspharmaceuticals.com/api/v1';
+      AppConstants.authApiUrl;
 
   @override
   void initState() {
@@ -496,7 +497,7 @@ class _LoginScreenState extends State<LoginScreen>
   }
 }
 
-// // ignore_for_file: deprecated_member_use, unused_element
+// 
 
 // import 'dart:convert';
 // import 'package:flutter/material.dart';
@@ -527,7 +528,7 @@ class _LoginScreenState extends State<LoginScreen>
 //   late Animation<Offset> _slideAnim;
 
 //   static const String _baseUrl =
-//       'https://testing.rasmuspharmaceuticals.com/api/v1';
+//       AppConstants.authApiUrl;
 
 //   @override
 //   void initState() {

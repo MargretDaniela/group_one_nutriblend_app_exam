@@ -1,20 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import '../providers/cart_provider.dart';
 import '../providers/wishlist_provider.dart';
+import '../utils/theme.dart';
 import 'home_screen.dart';
 import 'products_screen.dart';
 import 'cart_screen.dart';
 import 'profile_screen.dart';
-
-class AppTheme {
-  static const Color backgroundColor = Colors.white;
-  static const Color dividerColor = Color(0xFFE0E0E0);
-  static const Color primaryColor = Color(0xFF1E88E5);
-  static const Color textSecondary = Color(0xFF757575);
-  static const Color accentColor = Color(0xFFD32F2F);
-}
 
 class MainScreen extends StatefulWidget {
   final int initialIndex;
@@ -33,9 +26,7 @@ class MainScreenState extends State<MainScreen> {
     _currentIndex = widget.initialIndex;
   }
 
-  void switchTab(int index) {
-    setState(() => _currentIndex = index);
-  }
+  void switchTab(int index) => setState(() => _currentIndex = index);
 
   static const List<Widget> _screens = [
     HomeScreen(),
@@ -46,47 +37,52 @@ class MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (_) => CartProvider()),
-        ChangeNotifierProvider(create: (_) => WishlistProvider()),
-      ],
-      child: Scaffold(
-        backgroundColor: AppTheme.backgroundColor,
-        body: IndexedStack(index: _currentIndex, children: _screens),
-        bottomNavigationBar: _BottomNav(
-          currentIndex: _currentIndex,
-          onTap: switchTab,
-          cartCount: context.watch<CartProvider>().cartCount,
-        ),
+    final cart = Provider.of<CartProvider>(context);
+    final wl = Provider.of<WishlistProvider>(context);
+
+    return Scaffold(
+      backgroundColor: AppTheme.scaffold,
+      body: IndexedStack(index: _currentIndex, children: _screens),
+      bottomNavigationBar: _BottomNav(
+        currentIndex: _currentIndex,
+        onTap: switchTab,
+        cartCount: cart.cartCount,
+        wishlistCount: wl.count,
       ),
     );
   }
 }
 
+// ─── Bottom Navigation ────────────────────────────────────────────────────────
+
 class _BottomNav extends StatelessWidget {
   final int currentIndex;
   final ValueChanged<int> onTap;
   final int cartCount;
+  final int wishlistCount;
 
   const _BottomNav({
     required this.currentIndex,
     required this.onTap,
     required this.cartCount,
+    required this.wishlistCount,
   });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: Colors.white,
-        border: Border(
-          top: BorderSide(color: AppTheme.dividerColor, width: 0.8),
-        ),
+        boxShadow: [
+          BoxShadow(
+              color: Colors.black.withOpacity(0.07),
+              blurRadius: 16,
+              offset: const Offset(0, -4))
+        ],
       ),
       child: SafeArea(
         child: SizedBox(
-          height: 62,
+          height: 64,
           child: Row(
             children: [
               _NavItem(
@@ -97,22 +93,22 @@ class _BottomNav extends StatelessWidget {
                 currentIndex: currentIndex,
                 onTap: onTap,
               ),
-              _NavItemCart(
-                icon: Icons.grid_view_outlined,
-                activeIcon: Icons.grid_view_rounded,
+              _NavItem(
+                icon: Icons.storefront_outlined,
+                activeIcon: Icons.storefront_rounded,
                 label: 'Shop',
                 index: 1,
                 currentIndex: currentIndex,
                 onTap: onTap,
-                cartCount: cartCount,
               ),
-              _NavItem(
-                icon: Icons.shopping_cart_outlined,
-                activeIcon: Icons.shopping_cart_rounded,
+              _BadgeNavItem(
+                icon: Icons.shopping_bag_outlined,
+                activeIcon: Icons.shopping_bag_rounded,
                 label: 'Cart',
                 index: 2,
                 currentIndex: currentIndex,
                 onTap: onTap,
+                badge: cartCount,
               ),
               _NavItem(
                 icon: Icons.person_outline_rounded,
@@ -150,7 +146,6 @@ class _NavItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isActive = currentIndex == index;
-
     return Expanded(
       child: GestureDetector(
         onTap: () => onTap(index),
@@ -158,31 +153,34 @@ class _NavItem extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              isActive ? activeIcon : icon,
-              size: 24,
-              color: isActive ? AppTheme.primaryColor : AppTheme.textSecondary,
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              width: isActive ? 48 : 36,
+              height: 32,
+              decoration: BoxDecoration(
+                color: isActive
+                    ? AppTheme.primaryColor.withOpacity(0.12)
+                    : Colors.transparent,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(
+                isActive ? activeIcon : icon,
+                size: 22,
+                color: isActive
+                    ? AppTheme.primaryColor
+                    : const Color(0xFFB0BEC5),
+              ),
             ),
             const SizedBox(height: 3),
             Text(
               label,
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 10,
-                fontWeight: isActive ? FontWeight.w700 : FontWeight.w400,
+                fontWeight:
+                    isActive ? FontWeight.w700 : FontWeight.w400,
                 color: isActive
                     ? AppTheme.primaryColor
-                    : AppTheme.textSecondary,
-                letterSpacing: 0.3,
-              ),
-            ),
-            const SizedBox(height: 2),
-            AnimatedContainer(
-              duration: const Duration(milliseconds: 250),
-              width: isActive ? 16 : 0,
-              height: 2.5,
-              decoration: BoxDecoration(
-                color: AppTheme.primaryColor,
-                borderRadius: BorderRadius.circular(2),
+                    : const Color(0xFFB0BEC5),
               ),
             ),
           ],
@@ -192,23 +190,28 @@ class _NavItem extends StatelessWidget {
   }
 }
 
-class _NavItemCart extends _NavItem {
-  final int cartCount;
+class _BadgeNavItem extends StatelessWidget {
+  final IconData icon;
+  final IconData activeIcon;
+  final String label;
+  final int index;
+  final int currentIndex;
+  final ValueChanged<int> onTap;
+  final int badge;
 
-  const _NavItemCart({
-    required super.icon,
-    required super.activeIcon,
-    required super.label,
-    required super.index,
-    required super.currentIndex,
-    required super.onTap,
-    required this.cartCount,
+  const _BadgeNavItem({
+    required this.icon,
+    required this.activeIcon,
+    required this.label,
+    required this.index,
+    required this.currentIndex,
+    required this.onTap,
+    required this.badge,
   });
 
   @override
   Widget build(BuildContext context) {
     final isActive = currentIndex == index;
-
     return Expanded(
       child: GestureDetector(
         onTap: () => onTap(index),
@@ -218,33 +221,48 @@ class _NavItemCart extends _NavItem {
           children: [
             Stack(
               clipBehavior: Clip.none,
+              alignment: Alignment.center,
               children: [
-                Icon(
-                  isActive ? activeIcon : icon,
-                  size: 24,
-                  color: isActive
-                      ? AppTheme.primaryColor
-                      : AppTheme.textSecondary,
+                AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  width: isActive ? 48 : 36,
+                  height: 32,
+                  decoration: BoxDecoration(
+                    color: isActive
+                        ? AppTheme.primaryColor.withOpacity(0.12)
+                        : Colors.transparent,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(
+                    isActive ? activeIcon : icon,
+                    size: 22,
+                    color: isActive
+                        ? AppTheme.primaryColor
+                        : const Color(0xFFB0BEC5),
+                  ),
                 ),
-                if (cartCount > 0)
+                if (badge > 0)
                   Positioned(
-                    top: -5,
-                    right: -7,
+                    top: -4,
+                    right: -4,
                     child: Container(
-                      width: 16,
-                      height: 16,
-                      decoration: const BoxDecoration(
-                        color: AppTheme.accentColor,
-                        shape: BoxShape.circle,
+                      constraints: const BoxConstraints(
+                          minWidth: 16, minHeight: 16),
+                      padding:
+                          const EdgeInsets.symmetric(horizontal: 4),
+                      decoration: BoxDecoration(
+                        color: Colors.red.shade500,
+                        borderRadius: BorderRadius.circular(8),
+                        border:
+                            Border.all(color: Colors.white, width: 1.5),
                       ),
                       child: Center(
                         child: Text(
-                          cartCount > 9 ? '9+' : '$cartCount',
+                          badge > 9 ? '9+' : '$badge',
                           style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 9,
-                            fontWeight: FontWeight.w700,
-                          ),
+                              color: Colors.white,
+                              fontSize: 8,
+                              fontWeight: FontWeight.w800),
                         ),
                       ),
                     ),
@@ -256,21 +274,11 @@ class _NavItemCart extends _NavItem {
               label,
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 10,
-                fontWeight: isActive ? FontWeight.w700 : FontWeight.w400,
+                fontWeight:
+                    isActive ? FontWeight.w700 : FontWeight.w400,
                 color: isActive
                     ? AppTheme.primaryColor
-                    : AppTheme.textSecondary,
-                letterSpacing: 0.3,
-              ),
-            ),
-            const SizedBox(height: 2),
-            AnimatedContainer(
-              duration: const Duration(milliseconds: 250),
-              width: isActive ? 16 : 0,
-              height: 2.5,
-              decoration: BoxDecoration(
-                color: AppTheme.primaryColor,
-                borderRadius: BorderRadius.circular(2),
+                    : const Color(0xFFB0BEC5),
               ),
             ),
           ],

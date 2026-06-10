@@ -1,39 +1,18 @@
 import 'package:flutter/material.dart';
 
 class WishlistProvider extends ChangeNotifier {
-  final Set<int> _wishlistItems = {};
+  final Set<int> _ids = {};
 
-  Set<int> get wishlistItems => Set.unmodifiable(_wishlistItems);
+  bool isWishlisted(int id) => _ids.contains(id);
 
-  bool isInWishlist(int productId) => _wishlistItems.contains(productId);
-
-  void addToWishlist(int productId) {
-    if (!_wishlistItems.contains(productId)) {
-      _wishlistItems.add(productId);
-      notifyListeners();
-    }
-  }
-
-  void removeFromWishlist(int productId) {
-    if (_wishlistItems.contains(productId)) {
-      _wishlistItems.remove(productId);
-      notifyListeners();
-    }
-  }
-
-  void toggleWishlist(int productId) {
-    if (_wishlistItems.contains(productId)) {
-      _wishlistItems.remove(productId);
+  void toggle(int id) {
+    if (_ids.contains(id)) {
+      _ids.remove(id);
     } else {
-      _wishlistItems.add(productId);
+      _ids.add(id);
     }
     notifyListeners();
   }
 
-  void clearWishlist() {
-    if (_wishlistItems.isNotEmpty) {
-      _wishlistItems.clear();
-      notifyListeners();
-    }
-  }
+  int get count => _ids.length;
 }

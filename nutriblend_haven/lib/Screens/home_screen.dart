@@ -1,12 +1,64 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
 import '../providers/cart_provider.dart';
+import '../providers/wishlist_provider.dart';
 import '../services/product_service.dart';
 import '../utils/theme.dart';
-import 'main_screen.dart' hide AppTheme;
-import 'product_card.dart';
+import '../widgets/product_grid_card.dart';
+import '../widgets/reusable_widgets.dart';
+import 'main_screen.dart';
+
+// ─── Hero slide data ──────────────────────────────────────────────────────────
+
+class _HeroSlide {
+  final String imageUrl;
+  final String badge;
+  final String headline;
+  final String sub;
+  final Color tintStart;
+  final Color tintEnd;
+
+  const _HeroSlide({
+    required this.imageUrl,
+    required this.badge,
+    required this.headline,
+    required this.sub,
+    required this.tintStart,
+    required this.tintEnd,
+  });
+}
+
+const _heroSlides = [
+  _HeroSlide(
+    imageUrl: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=900&q=80',
+    badge: 'NEW ARRIVALS',
+    headline: 'Premium Supplements\nFor Peak Performance',
+    sub: 'Shop Now',
+    tintStart: Color(0xFF007A33),
+    tintEnd: Color(0xFF00C853),
+  ),
+  _HeroSlide(
+    imageUrl: 'https://images.unsplash.com/photo-1579722820308-d74e571900a9?w=900&q=80',
+    badge: 'BESTSELLERS',
+    headline: 'Natural Vitamins\nFor Daily Wellness',
+    sub: 'Explore',
+    tintStart: Color(0xFF1B5E20),
+    tintEnd: Color(0xFF43A047),
+  ),
+  _HeroSlide(
+    imageUrl: 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=900&q=80',
+    badge: 'ORGANIC RANGE',
+    headline: 'Pure & Certified\nOrganic Nutrition',
+    sub: 'Discover',
+    tintStart: Color(0xFF004D40),
+    tintEnd: Color(0xFF00BFA5),
+  ),
+];
+
+// ─── Screen ───────────────────────────────────────────────────────────────────
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -17,7 +69,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   List<dynamic> _products = [];
-  List<dynamic> _categories = [
+  List<Map<String, dynamic>> _categories = [
     {'id': null, 'name': 'All'}
   ];
   int? _selectedCategoryId;
@@ -28,32 +80,34 @@ class _HomeScreenState extends State<HomeScreen> {
   int _lastPage = 1;
   String _search = '';
   final TextEditingController _searchController = TextEditingController();
-  final PageController _pageController = PageController();
-  int _currentHeroIndex = 0;
+
+  int _heroIndex = 0;
+  late PageController _heroController;
+  Timer? _heroTimer;
 
   @override
   void initState() {
     super.initState();
+    _heroController = PageController();
+    _startHeroTimer();
     _loadCategories();
     _loadPage(1);
-    _startHeroAutoRefresh();
   }
 
   @override
   void dispose() {
+    _heroTimer?.cancel();
+    _heroController.dispose();
     _searchController.dispose();
-    _pageController.dispose();
     super.dispose();
   }
 
-  void _startHeroAutoRefresh() {
-    Future.delayed(const Duration(seconds: 5), () {
-      if (mounted) {
-        setState(() {
-          _currentHeroIndex = (_currentHeroIndex + 1) % 3;
-        });
-        _startHeroAutoRefresh();
-      }
+  void _startHeroTimer() {
+    _heroTimer = Timer.periodic(const Duration(seconds: 4), (_) {
+      if (!mounted) return;
+      final next = (_heroIndex + 1) % _heroSlides.length;
+      _heroController.animateToPage(next,
+          duration: const Duration(milliseconds: 600), curve: Curves.easeInOut);
     });
   }
 
@@ -76,27 +130,17 @@ class _HomeScreenState extends State<HomeScreen> {
       cats.sort((a, b) => a['name'] == 'All'
           ? -1
           : (a['name'] as String).compareTo(b['name'] as String));
-      if (mounted) {
-        setState(() {
-          _categories = cats;
-          _catsLoaded = true;
-        });
-      }
+      if (mounted) setState(() { _categories = cats; _catsLoaded = true; });
     } catch (_) {}
   }
 
   Future<void> _loadPage(int page) async {
     if (_isLoading && page != 1) return;
-    setState(() {
-      _isLoading = true;
-      _error = null;
-    });
+    setState(() { _isLoading = true; _error = null; });
     try {
       final res = await ProductService.fetchProducts(
-        page: page,
-        perPage: 12,
-        search: _search,
-        categoryId: _selectedCategoryId,
+        page: page, perPage: 12,
+        search: _search, categoryId: _selectedCategoryId,
       );
       if (!mounted) return;
       setState(() {
@@ -105,7 +149,7 @@ class _HomeScreenState extends State<HomeScreen> {
         _lastPage = res['lastPage'] as int;
         _isLoading = false;
       });
-    } catch (e) {
+    } catch (_) {
       if (!mounted) return;
       setState(() {
         _error = 'Could not load products. Check your connection.';
@@ -114,29 +158,23 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  void _doSearch(String v) {
-    setState(() => _search = v);
-    _loadPage(1);
+  Future<void> _onRefresh() async {
+    _catsLoaded = false;
+    await Future.wait([_loadCategories(), _loadPage(1)]);
   }
 
-  void _selectCategory(int? id) {
-    setState(() => _selectedCategoryId = id);
-    _loadPage(1);
-  }
-
-  void _goToCart() {
-    context.findAncestorStateOfType<MainScreenState>()?.switchTab(2);
-  }
+  void _doSearch(String v) { setState(() => _search = v); _loadPage(1); }
+  void _selectCategory(int? id) { setState(() => _selectedCategoryId = id); _loadPage(1); }
+  void _goToCart() => context.findAncestorStateOfType<MainScreenState>()?.switchTab(2);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.backgroundColor,
+      backgroundColor: AppTheme.scaffold,
       body: RefreshIndicator(
-        onRefresh: () async {
-          await _loadCategories();
-          await _loadPage(1);
-        },
+        color: AppTheme.primaryColor,
+        strokeWidth: 2.5,
+        onRefresh: _onRefresh,
         child: CustomScrollView(
           slivers: [
             _buildAppBar(),
@@ -144,31 +182,40 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildHero(),
-                  const SizedBox(height: 16),
-                  _buildSearchBar(),
-                  const SizedBox(height: 14),
-                  _buildCategoryRow(),
+                  _buildHeroCarousel(),
                   const SizedBox(height: 20),
+                  // Search bar with green styling
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 14),
+                    child: SearchBarWidget(
+                      controller: _searchController,
+                      onSearch: _doSearch,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  _buildCategoryRow(),
+                  const SizedBox(height: 24),
+                  // Quick stats / promo banner
+                  _buildPromoBanner(),
+                  const SizedBox(height: 24),
                   if (_products.isNotEmpty && !_isLoading) ...[
-                    _buildSectionHeader('Featured'),
-                    const SizedBox(height: 12),
+                    _sectionHeader('Featured',
+                        onSeeAll: () => context
+                            .findAncestorStateOfType<MainScreenState>()
+                            ?.switchTab(1)),
+                    const SizedBox(height: 14),
                     _buildFeaturedScroll(),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 24),
                   ],
-                  _buildSectionHeader(
+                  _sectionHeader(
                     'All Products',
                     trailing: _lastPage > 1
-                        ? Text(
-                            'Page $_currentPage of $_lastPage',
+                        ? Text('Page $_currentPage of $_lastPage',
                             style: GoogleFonts.plusJakartaSans(
-                              fontSize: 12,
-                              color: AppTheme.textSecondary,
-                            ),
-                          )
+                                fontSize: 12, color: AppTheme.textSecondary))
                         : null,
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 14),
                 ],
               ),
             ),
@@ -185,293 +232,131 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildAppBar() {
     return SliverAppBar(
       pinned: true,
-      backgroundColor: Colors.white,
+      // Green gradient app bar instead of plain white
+      backgroundColor: AppTheme.primaryColor,
+      surfaceTintColor: Colors.transparent,
       elevation: 0,
       titleSpacing: 16,
       title: Row(
         children: [
           Container(
-            width: 34,
-            height: 34,
+            width: 36, height: 36,
             decoration: BoxDecoration(
-              color: AppTheme.primaryColor,
+              color: Colors.white.withOpacity(0.2),
               borderRadius: BorderRadius.circular(10),
             ),
-            child: const Icon(
-              Icons.local_florist_rounded,
-              color: Colors.white,
-              size: 18,
-            ),
+            child: const Icon(Icons.local_florist_rounded, color: Colors.white, size: 18),
           ),
           const SizedBox(width: 10),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(
-                'NutriBlend',
-                style: GoogleFonts.playfairDisplay(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w800,
-                  color: AppTheme.primaryColor,
-                ),
-              ),
-              Text(
-                'Premium Supplements',
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 10,
-                  color: AppTheme.textSecondary,
-                ),
-              ),
+              Text('NutriBlend',
+                  style: GoogleFonts.playfairDisplay(
+                      fontSize: 16, fontWeight: FontWeight.w800, color: Colors.white)),
+              Text('Premium Supplements',
+                  style: GoogleFonts.plusJakartaSans(
+                      fontSize: 10, color: Colors.white70)),
             ],
           ),
         ],
       ),
       actions: [
-        Consumer<CartProvider>(
-          builder: (context, cart, _) => Stack(
-            alignment: Alignment.center,
-            children: [
-              IconButton(
-                onPressed: cart.cart.isEmpty ? null : _goToCart,
-                icon: Container(
-                  width: 36,
-                  height: 36,
-                  decoration: BoxDecoration(
-                    color: AppTheme.primaryLight,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: const Icon(
-                    Icons.shopping_cart_outlined,
-                    color: AppTheme.primaryColor,
-                    size: 20,
-                  ),
-                ),
-              ),
-              if (cart.cartCount > 0)
-                Positioned(
-                  top: 6,
-                  right: 6,
-                  child: Container(
-                    width: 16,
-                    height: 16,
-                    decoration: const BoxDecoration(
-                      color: AppTheme.accentColor,
-                      shape: BoxShape.circle,
-                    ),
-                    child: Center(
-                      child: Text(
-                        cart.cartCount > 9 ? '9+' : '${cart.cartCount}',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 9,
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-            ],
+        Consumer<WishlistProvider>(
+          builder: (_, wl, __) => _iconBtn(
+            icon: Icons.favorite_border_rounded,
+            count: wl.count,
+            onTap: () {},
           ),
         ),
-        IconButton(
-          onPressed: () {
-            _loadCategories();
-            _loadPage(1);
-          },
-          icon: Container(
-            width: 36,
-            height: 36,
+        const SizedBox(width: 4),
+        Consumer<CartProvider>(
+          builder: (_, cart, __) => _iconBtn(
+            icon: Icons.shopping_bag_outlined,
+            count: cart.cartCount,
+            onTap: cart.cart.isEmpty ? null : _goToCart,
+          ),
+        ),
+        const SizedBox(width: 10),
+      ],
+    );
+  }
+
+  Widget _iconBtn({required IconData icon, int count = 0, VoidCallback? onTap}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          Container(
+            width: 38, height: 38,
             decoration: BoxDecoration(
-              color: AppTheme.primaryLight,
+              color: Colors.white.withOpacity(0.2),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: const Icon(
-              Icons.refresh_rounded,
-              color: AppTheme.primaryColor,
-              size: 20,
-            ),
+            child: Icon(icon, color: Colors.white, size: 20),
           ),
-        ),
-        const SizedBox(width: 8),
-      ],
-      bottom: PreferredSize(
-        preferredSize: const Size.fromHeight(0.5),
-        child: Container(height: 0.5, color: AppTheme.dividerColor),
+          if (count > 0)
+            Positioned(
+              top: -4, right: -4,
+              child: Container(
+                width: 17, height: 17,
+                decoration: BoxDecoration(
+                  color: Colors.amber.shade600,
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Colors.white, width: 1.5),
+                ),
+                child: Center(
+                  child: Text(count > 9 ? '9+' : '$count',
+                      style: const TextStyle(
+                          color: Colors.white, fontSize: 8, fontWeight: FontWeight.w800)),
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }
 
-  Widget _buildHero() {
-    return Container(
-      margin: const EdgeInsets.fromLTRB(14, 14, 14, 0),
-      height: 220,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(22),
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            AppTheme.primaryColor.withOpacity(0.9),
-            AppTheme.accentColor.withOpacity(0.8),
-          ],
-        ),
-      ),
-      child: PageView.builder(
-        controller: _pageController,
-        itemCount: 3,
-        physics: const NeverScrollableScrollPhysics(),
-        itemBuilder: (context, index) {
-          return Stack(
-            children: [
-              Positioned.fill(
-                child: Image.network(
-                  index == 0
-                      ? 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800&q=80'
-                      : index == 1
-                          ? 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=800&q=80'
-                          : 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=800&q=80',
-                  fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) =>
-                      Container(color: AppTheme.primaryColor),
-                ),
-              ),
-              Positioned.fill(
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [
-                        Colors.black.withOpacity(0.4),
-                        Colors.black.withOpacity(0.1),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(24, 28, 24, 28),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 5,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.2),
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(
-                          color: Colors.white.withOpacity(0.3),
-                        ),
-                      ),
-                      child: Text(
-                        index == 0 ? 'NEW ARRIVALS' : index == 1 ? 'BEST SELLERS' : 'SPECIAL OFFERS',
-                        style: GoogleFonts.plusJakartaSans(
-                          color: Colors.white,
-                          fontSize: 11,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: 1.8,
-                        ),
-                      ),
-                    ),
-                    Text(
-                      index == 0
-                          ? 'Premium Supplements\nFor Peak Performance'
-                          : index == 1
-                              ? 'Top Quality Products\nFor Your Health'
-                              : 'Exclusive Deals\nJust For You',
-                      style: GoogleFonts.playfairDisplay(
-                        color: Colors.white,
-                        fontSize: 24,
-                        fontWeight: FontWeight.w800,
-                        height: 1.2,
-                      ),
-                    ),
-                    GestureDetector(
-                      onTap: () => _selectCategory(null),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 26,
-                          vertical: 12,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(30),
-                        ),
-                        child: Text(
-                          'Shop Now',
-                          style: GoogleFonts.plusJakartaSans(
-                            color: AppTheme.primaryColor,
-                            fontWeight: FontWeight.w800,
-                            fontSize: 13,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _buildSearchBar() {
+  Widget _buildHeroCarousel() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 14),
-      child: Container(
-        height: 48,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: AppTheme.dividerColor),
-          boxShadow: [
-            BoxShadow(
-              color: AppTheme.shadowColor,
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        child: Row(
+      padding: const EdgeInsets.fromLTRB(14, 14, 14, 0),
+      child: SizedBox(
+        height: 228,
+        child: Stack(
           children: [
-            Icon(Icons.search_rounded, color: AppTheme.textSecondary, size: 20),
-            const SizedBox(width: 10),
-            Expanded(
-              child: TextField(
-                controller: _searchController,
-                textInputAction: TextInputAction.search,
-                onSubmitted: _doSearch,
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 14,
-                  color: AppTheme.textPrimary,
-                ),
-                decoration: InputDecoration(
-                  hintText: 'Search supplements...',
-                  hintStyle: GoogleFonts.plusJakartaSans(
-                    color: AppTheme.textSecondary,
-                    fontSize: 14,
-                  ),
-                  border: InputBorder.none,
-                  isDense: true,
+            ClipRRect(
+              borderRadius: BorderRadius.circular(22),
+              child: PageView.builder(
+                controller: _heroController,
+                itemCount: _heroSlides.length,
+                onPageChanged: (i) => setState(() => _heroIndex = i),
+                itemBuilder: (_, i) => _HeroSlideWidget(
+                  slide: _heroSlides[i],
+                  onShopNow: () => _selectCategory(null),
                 ),
               ),
             ),
-            if (_search.isNotEmpty)
-              GestureDetector(
-                onTap: () {
-                  _searchController.clear();
-                  _doSearch('');
-                },
-                child: Icon(Icons.close_rounded, color: AppTheme.textSecondary, size: 18),
+            Positioned(
+              bottom: 14, left: 0, right: 0,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: List.generate(_heroSlides.length, (i) {
+                  final active = i == _heroIndex;
+                  return AnimatedContainer(
+                    duration: const Duration(milliseconds: 280),
+                    margin: const EdgeInsets.symmetric(horizontal: 3),
+                    width: active ? 22 : 6,
+                    height: 6,
+                    decoration: BoxDecoration(
+                      color: active ? Colors.white : Colors.white.withOpacity(0.45),
+                      borderRadius: BorderRadius.circular(3),
+                    ),
+                  );
+                }),
               ),
+            ),
           ],
         ),
       ),
@@ -480,7 +365,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildCategoryRow() {
     return SizedBox(
-      height: 38,
+      height: 40,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 14),
@@ -493,36 +378,31 @@ class _HomeScreenState extends State<HomeScreen> {
             child: GestureDetector(
               onTap: () => _selectCategory(cat['id'] as int?),
               child: AnimatedContainer(
-                duration: const Duration(milliseconds: 180),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 8,
-                ),
+                duration: const Duration(milliseconds: 200),
+                padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 9),
                 decoration: BoxDecoration(
-                  color: sel ? AppTheme.primaryColor : Colors.white,
-                  borderRadius: BorderRadius.circular(22),
+                  gradient: sel
+                      ? const LinearGradient(
+                          colors: [AppTheme.primaryColor, AppTheme.primaryDark],
+                          begin: Alignment.topLeft, end: Alignment.bottomRight)
+                      : null,
+                  color: sel ? null : Colors.white,
+                  borderRadius: BorderRadius.circular(24),
                   border: Border.all(
-                    color: sel ? AppTheme.primaryColor : AppTheme.dividerColor,
-                    width: sel ? 0 : 1,
+                    color: sel ? Colors.transparent : AppTheme.primaryLight,
+                    width: 1.5,
                   ),
                   boxShadow: sel
-                      ? [
-                          BoxShadow(
-                            color: AppTheme.primaryColor.withOpacity(0.25),
-                            blurRadius: 8,
-                            offset: const Offset(0, 3),
-                          )
-                        ]
+                      ? [BoxShadow(color: AppTheme.primaryColor.withOpacity(0.35),
+                            blurRadius: 8, offset: const Offset(0, 3))]
                       : [],
                 ),
-                child: Text(
-                  cat['name'] as String,
-                  style: GoogleFonts.plusJakartaSans(
-                    color: sel ? Colors.white : AppTheme.textPrimary,
-                    fontWeight: sel ? FontWeight.w700 : FontWeight.w500,
-                    fontSize: 13,
-                  ),
-                ),
+                child: Text(cat['name'] as String,
+                    style: GoogleFonts.plusJakartaSans(
+                      color: sel ? Colors.white : AppTheme.primaryDark,
+                      fontWeight: sel ? FontWeight.w700 : FontWeight.w600,
+                      fontSize: 13,
+                    )),
               ),
             ),
           );
@@ -531,22 +411,94 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildSectionHeader(String title, {Widget? trailing}) {
+  // Promo banner replacing the bland gap between categories and featured
+  Widget _buildPromoBanner() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 14),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [Color(0xFF00C853), Color(0xFF1DE9B6)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(18),
+          boxShadow: [
+            BoxShadow(
+              color: AppTheme.primaryColor.withOpacity(0.3),
+              blurRadius: 14,
+              offset: const Offset(0, 5),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Free Delivery',
+                      style: GoogleFonts.playfairDisplay(
+                          fontSize: 18, fontWeight: FontWeight.w800, color: Colors.white)),
+                  const SizedBox(height: 4),
+                  Text('On orders above UGX 50,000',
+                      style: GoogleFonts.plusJakartaSans(
+                          fontSize: 12, color: Colors.white.withOpacity(0.9))),
+                ],
+              ),
+            ),
+            Container(
+              width: 48, height: 48,
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.25),
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: const Icon(Icons.local_shipping_outlined, color: Colors.white, size: 26),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _sectionHeader(String title, {VoidCallback? onSeeAll, Widget? trailing}) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 0, 14, 0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Text(
-            title,
-            style: GoogleFonts.playfairDisplay(
-              fontSize: 18,
-              fontWeight: FontWeight.w800,
-              color: AppTheme.textPrimary,
-            ),
+          Row(
+            children: [
+              Container(
+                width: 4, height: 20,
+                decoration: BoxDecoration(
+                  color: AppTheme.primaryColor,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Text(title,
+                  style: GoogleFonts.playfairDisplay(
+                      fontSize: 18, fontWeight: FontWeight.w800, color: AppTheme.textPrimary)),
+            ],
           ),
-          if (trailing != null) trailing,
+          if (onSeeAll != null)
+            GestureDetector(
+              onTap: onSeeAll,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+                decoration: BoxDecoration(
+                  color: AppTheme.primaryColor.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text('See all',
+                    style: GoogleFonts.plusJakartaSans(
+                        fontSize: 12, fontWeight: FontWeight.w700, color: AppTheme.primaryDark)),
+              ),
+            )
+          else if (trailing != null)
+            trailing,
         ],
       ),
     );
@@ -555,12 +507,18 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildFeaturedScroll() {
     final featured = _products.take(6).toList();
     return SizedBox(
-      height: 200,
+      height: 224,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 14),
         itemCount: featured.length,
-        itemBuilder: (_, i) => ProductCard(product: featured[i], isFeatured: true),
+        itemBuilder: (_, i) => SizedBox(
+          width: 152,
+          child: ProductGridCard(
+            product: featured[i] as Map<String, dynamic>,
+            isFeatured: true,
+          ),
+        ),
       ),
     );
   }
@@ -568,16 +526,22 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildProductsSliver() {
     if (_isLoading) {
       return SliverPadding(
-        padding: const EdgeInsets.fromLTRB(14, 0, 14, 0),
+        padding: const EdgeInsets.symmetric(horizontal: 14),
         sliver: SliverGrid(
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            mainAxisSpacing: 12,
-            crossAxisSpacing: 12,
-            childAspectRatio: 0.68,
-          ),
+              crossAxisCount: 2,
+              mainAxisSpacing: 14,
+              crossAxisSpacing: 14,
+              childAspectRatio: 0.65),
           delegate: SliverChildBuilderDelegate(
-            (_, __) => _ShimmerCard(),
+            (_, __) => Shimmer.fromColors(
+              baseColor: Colors.green.shade100,
+              highlightColor: Colors.green.shade50,
+              child: Container(
+                  decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(20))),
+            ),
             childCount: 6,
           ),
         ),
@@ -586,7 +550,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     if (_error != null) {
       return SliverFillRemaining(
-        child: _ErrorView(
+        child: ErrorView(
           message: _error!,
           onRetry: () => _loadPage(_currentPage),
         ),
@@ -595,69 +559,32 @@ class _HomeScreenState extends State<HomeScreen> {
 
     if (_products.isEmpty) {
       return SliverFillRemaining(
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                width: 72,
-                height: 72,
-                decoration: BoxDecoration(
-                  color: AppTheme.primaryLight,
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.search_off_rounded,
-                  size: 36,
-                  color: AppTheme.primaryColor,
-                ),
-              ),
-              const SizedBox(height: 16),
-              Text(
-                'No products found',
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w600,
-                  color: AppTheme.textSecondary,
-                ),
-              ),
-              if (_search.isNotEmpty || _selectedCategoryId != null) ...[
-                const SizedBox(height: 12),
-                TextButton(
-                  onPressed: () {
-                    _searchController.clear();
-                    setState(() {
-                      _search = '';
-                      _selectedCategoryId = null;
-                    });
-                    _loadPage(1);
-                  },
-                  child: Text(
-                    'Clear filters',
-                    style: GoogleFonts.plusJakartaSans(
-                      color: AppTheme.primaryColor,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              ],
-            ],
-          ),
+        child: EmptyStateWidget(
+          icon: Icons.search_off_rounded,
+          title: 'No products found',
+          subtitle: 'Try a different search or category.',
+          actionLabel: (_search.isNotEmpty || _selectedCategoryId != null)
+              ? 'Clear filters'
+              : null,
+          onAction: () {
+            _searchController.clear();
+            setState(() { _search = ''; _selectedCategoryId = null; });
+            _loadPage(1);
+          },
         ),
       );
     }
 
     return SliverPadding(
-      padding: const EdgeInsets.fromLTRB(14, 0, 14, 0),
+      padding: const EdgeInsets.symmetric(horizontal: 14),
       sliver: SliverGrid(
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          mainAxisSpacing: 12,
-          crossAxisSpacing: 12,
-          childAspectRatio: 0.68,
-        ),
+            crossAxisCount: 2,
+            mainAxisSpacing: 14,
+            crossAxisSpacing: 14,
+            childAspectRatio: 0.65),
         delegate: SliverChildBuilderDelegate(
-          (_, i) => ProductCard(product: _products[i]),
+          (_, i) => ProductGridCard(product: _products[i] as Map<String, dynamic>),
           childCount: _products.length,
         ),
       ),
@@ -665,137 +592,123 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildPagination() {
+    Widget btn(IconData icon, VoidCallback? onTap) {
+      final active = onTap != null;
+      return GestureDetector(
+        onTap: onTap,
+        child: Container(
+          width: 44, height: 44,
+          decoration: BoxDecoration(
+            gradient: active
+                ? const LinearGradient(
+                    colors: [AppTheme.primaryColor, AppTheme.primaryDark],
+                    begin: Alignment.topLeft, end: Alignment.bottomRight)
+                : null,
+            color: active ? null : Colors.grey.shade200,
+            borderRadius: BorderRadius.circular(14),
+          ),
+          child: Icon(icon,
+              color: active ? Colors.white : Colors.grey.shade400, size: 22),
+        ),
+      );
+    }
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 24),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          _pageBtn(
-            Icons.chevron_left,
-            _currentPage > 1 ? () => _loadPage(_currentPage - 1) : null,
-          ),
+          btn(Icons.chevron_left,
+              _currentPage > 1 ? () => _loadPage(_currentPage - 1) : null),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Text(
-              '$_currentPage / $_lastPage',
-              style: GoogleFonts.plusJakartaSans(
-                fontWeight: FontWeight.w700,
-                fontSize: 14,
-                color: AppTheme.textPrimary,
-              ),
-            ),
+            child: Text('$_currentPage / $_lastPage',
+                style: GoogleFonts.plusJakartaSans(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 14,
+                    color: AppTheme.textPrimary)),
           ),
-          _pageBtn(
-            Icons.chevron_right,
-            _currentPage < _lastPage
-                ? () => _loadPage(_currentPage + 1)
-                : null,
-          ),
+          btn(Icons.chevron_right,
+              _currentPage < _lastPage
+                  ? () => _loadPage(_currentPage + 1)
+                  : null),
         ],
       ),
     );
   }
-
-  Widget _pageBtn(IconData icon, VoidCallback? onTap) {
-    final active = onTap != null;
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 44,
-        height: 44,
-        decoration: BoxDecoration(
-          color: active ? AppTheme.primaryColor : AppTheme.dividerColor,
-          borderRadius: BorderRadius.circular(14),
-        ),
-        child: Icon(
-          icon,
-          color: active ? Colors.white : AppTheme.textSecondary,
-          size: 22,
-        ),
-      ),
-    );
-  }
 }
 
-class _ShimmerCard extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Shimmer.fromColors(
-      baseColor: AppTheme.shimmerBase,
-      highlightColor: AppTheme.shimmerHighlight,
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(18),
-        ),
-      ),
-    );
-  }
-}
+// ─── Hero slide widget ────────────────────────────────────────────────────────
 
-class _ErrorView extends StatelessWidget {
-  final String message;
-  final VoidCallback onRetry;
-  const _ErrorView({required this.message, required this.onRetry});
+class _HeroSlideWidget extends StatelessWidget {
+  final _HeroSlide slide;
+  final VoidCallback onShopNow;
+  const _HeroSlideWidget({required this.slide, required this.onShopNow});
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              width: 72,
-              height: 72,
-              decoration: BoxDecoration(
-                color: AppTheme.primaryLight,
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Icon(Icons.wifi_off_rounded,
-                  size: 36, color: AppTheme.primaryColor),
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        Image.network(slide.imageUrl, fit: BoxFit.cover,
+            errorBuilder: (_, __, ___) => Container(color: slide.tintStart)),
+        DecoratedBox(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topRight, end: Alignment.bottomLeft,
+              colors: [
+                slide.tintStart.withOpacity(0.55),
+                slide.tintEnd.withOpacity(0.88),
+              ],
             ),
-            const SizedBox(height: 16),
-            Text(
-              'Connection Error',
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 17,
-                fontWeight: FontWeight.w700,
-                color: AppTheme.textPrimary,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              message,
-              textAlign: TextAlign.center,
-              style: GoogleFonts.plusJakartaSans(
-                color: AppTheme.textSecondary,
-                fontSize: 13,
-              ),
-            ),
-            const SizedBox(height: 24),
-            ElevatedButton.icon(
-              onPressed: onRetry,
-              icon: const Icon(Icons.refresh_rounded, size: 18),
-              label: Text(
-                'Try Again',
-                style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w600),
-              ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppTheme.primaryColor,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 28, vertical: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(24, 28, 24, 36),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.25),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: Colors.white.withOpacity(0.4)),
                 ),
-                elevation: 0,
+                child: Text(slide.badge,
+                    style: GoogleFonts.plusJakartaSans(
+                        color: Colors.white, fontSize: 10,
+                        fontWeight: FontWeight.w700, letterSpacing: 2)),
               ),
-            ),
-          ],
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(slide.headline,
+                      style: GoogleFonts.playfairDisplay(
+                          color: Colors.white, fontSize: 22,
+                          fontWeight: FontWeight.w800, height: 1.25)),
+                  const SizedBox(height: 16),
+                  GestureDetector(
+                    onTap: onShopNow,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 11),
+                      decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(30)),
+                      child: Text(slide.sub,
+                          style: GoogleFonts.plusJakartaSans(
+                              color: AppTheme.primaryDark,
+                              fontWeight: FontWeight.w800,
+                              fontSize: 13)),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
-      ),
+      ],
     );
   }
 }

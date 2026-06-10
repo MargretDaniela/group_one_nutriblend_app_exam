@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../providers/cart_provider.dart';
-import '../providers/wishlist_provider.dart';
 import '../utils/theme.dart';
 
 class ProductCard extends StatefulWidget {
@@ -25,7 +24,7 @@ class _ProductCardState extends State<ProductCard> {
   late final String _price;
   late final String _image;
   late final bool _inStock;
-  bool _isWishlistLoading = false;
+  bool _isInWishlist = false;
 
   @override
   void initState() {
@@ -35,13 +34,14 @@ class _ProductCardState extends State<ProductCard> {
     _price = widget.product['formatted_price'] ?? '';
     _image = widget.product['main_image'] ?? '';
     _inStock = widget.product['in_stock'] ?? true;
+    _isInWishlist = widget.product['is_in_wishlist'] ?? false;
   }
 
   @override
   Widget build(BuildContext context) {
-    return Consumer2<WishlistProvider, CartProvider>(
-      builder: (context, wishlistProvider, cartProvider, child) {
-        final bool inWishlist = wishlistProvider.isInWishlist(_productId);
+    return Consumer<CartProvider>(
+      builder: (context, cartProvider, child) {
+        final bool inWishlist = _isInWishlist;
         final bool inCart = cartProvider.isInCart(_productId);
 
         return Container(
@@ -52,7 +52,7 @@ class _ProductCardState extends State<ProductCard> {
             borderRadius: BorderRadius.circular(18),
             boxShadow: [
               BoxShadow(
-                color: AppTheme.shadowColor,
+                color: Colors.black.withOpacity(0.1),
                 blurRadius: 10,
                 offset: const Offset(0, 4),
               ),
@@ -60,10 +60,13 @@ class _ProductCardState extends State<ProductCard> {
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
             children: [
               // Image with wishlist button
               ClipRRect(
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(18)),
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(18),
+                ),
                 child: Stack(
                   children: [
                     Container(
@@ -91,34 +94,31 @@ class _ProductCardState extends State<ProductCard> {
                       top: 8,
                       right: 8,
                       child: GestureDetector(
-                        onTap: () async {
-                          setState(() => _isWishlistLoading = true);
-                          try {
-                            wishlistProvider.toggleWishlist(_productId);
-                            if (mounted) {
-                              setState(() => _isWishlistLoading = false);
-                              ScaffoldMessenger.of(context).clearSnackBars();
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                    inWishlist ? 'Removed from wishlist' : 'Added to wishlist',
-                                    style: GoogleFonts.plusJakartaSans(fontSize: 13),
-                                  ),
-                                  backgroundColor: inWishlist ? AppTheme.errorColor : AppTheme.successColor,
-                                  behavior: SnackBarBehavior.floating,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                  margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                                  duration: const Duration(seconds: 1),
+                        onTap: () {
+                          final bool isNowInWishlist = !_isInWishlist;
+                          setState(() => _isInWishlist = isNowInWishlist);
+                          ScaffoldMessenger.of(context).clearSnackBars();
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                isNowInWishlist
+                                    ? 'Added to wishlist'
+                                    : 'Removed from wishlist',
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontSize: 13,
                                 ),
-                              );
-                            }
-                          } catch (e) {
-                            if (mounted) {
-                              setState(() => _isWishlistLoading = false);
-                            }
-                          }
+                              ),
+                              backgroundColor: isNowInWishlist
+                                  ? Colors.green
+                                  : Colors.redAccent,
+                              behavior: SnackBarBehavior.floating,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                              duration: const Duration(seconds: 1),
+                            ),
+                          );
                         },
                         child: Container(
                           width: 32,
@@ -128,26 +128,21 @@ class _ProductCardState extends State<ProductCard> {
                             borderRadius: BorderRadius.circular(16),
                             boxShadow: [
                               BoxShadow(
-                                color: AppTheme.shadowColor,
+                                color: Colors.black.withOpacity(0.1),
                                 blurRadius: 4,
                                 offset: const Offset(0, 2),
                               ),
                             ],
                           ),
-                          child: _isWishlistLoading
-                              ? SizedBox(
-                                  width: 20,
-                                  height: 20,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    valueColor: AlwaysStoppedAnimation<Color>(AppTheme.primaryColor),
-                                  ),
-                                )
-                              : Icon(
-                                  inWishlist ? Icons.favorite_rounded : Icons.favorite_border_rounded,
-                                  color: inWishlist ? AppTheme.accentColor : AppTheme.textSecondary,
-                                  size: 18,
-                                ),
+                          child: Icon(
+                            inWishlist
+                                ? Icons.favorite_rounded
+                                : Icons.favorite_border_rounded,
+                            color: inWishlist
+                                ? Colors.redAccent
+                                : AppTheme.textSecondary,
+                            size: 18,
+                          ),
                         ),
                       ),
                     ),
@@ -172,103 +167,114 @@ class _ProductCardState extends State<ProductCard> {
                 ),
               ),
               // Content
-              Expanded(
-                child: Padding(
-                  padding: EdgeInsets.fromLTRB(
-                    widget.isFeatured ? 10 : 11,
-                    widget.isFeatured ? 8 : 9,
-                    widget.isFeatured ? 10 : 11,
-                    widget.isFeatured ? 10 : 11,
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
+              Padding(
+                padding: EdgeInsets.fromLTRB(
+                  widget.isFeatured ? 10 : 11,
+                  widget.isFeatured ? 8 : 9,
+                  widget.isFeatured ? 10 : 11,
+                  widget.isFeatured ? 10 : 11,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      _name,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: widget.isFeatured ? 12 : 12,
+                        fontWeight: FontWeight.w700,
+                        color: AppTheme.textPrimary,
+                        height: 1.3,
+                      ),
+                    ),
+                    const SizedBox(height: 3),
+                    if (!widget.isFeatured) ...[
                       Text(
-                        _name,
-                        maxLines: widget.isFeatured ? 2 : 2,
-                        overflow: TextOverflow.ellipsis,
+                        _inStock ? '● In Stock' : '● Out of Stock',
                         style: GoogleFonts.plusJakartaSans(
-                          fontSize: widget.isFeatured ? 12 : 12,
-                          fontWeight: FontWeight.w700,
-                          color: AppTheme.textPrimary,
-                          height: 1.3,
+                          fontSize: 10,
+                          fontWeight: FontWeight.w600,
+                          color: _inStock ? Colors.green : Colors.redAccent,
                         ),
                       ),
-                      const SizedBox(height: 3),
-                      if (!widget.isFeatured) ...[
-                        Text(
-                          _inStock ? '● In Stock' : '● Out of Stock',
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 10,
-                            fontWeight: FontWeight.w600,
-                            color: _inStock
-                                ? AppTheme.successColor
-                                : AppTheme.errorColor,
-                          ),
-                        ),
-                        const SizedBox(height: 7),
-                      ],
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              _price,
-                              overflow: TextOverflow.ellipsis,
-                              style: GoogleFonts.plusJakartaSans(
-                                color: AppTheme.primaryColor,
-                                fontSize: widget.isFeatured ? 12 : 13,
-                                fontWeight: FontWeight.w900,
-                              ),
+                      const SizedBox(height: 7),
+                    ],
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            _price,
+                            overflow: TextOverflow.ellipsis,
+                            style: GoogleFonts.plusJakartaSans(
+                              color: AppTheme.primaryColor,
+                              fontSize: widget.isFeatured ? 12 : 13,
+                              fontWeight: FontWeight.w900,
                             ),
                           ),
-                          if (widget.isFeatured) const SizedBox(width: 6),
-                          if (widget.isFeatured)
-                            GestureDetector(
-                              onTap: _inStock
-                                  ? () {
-                                      cartProvider.addToCart({
-                                        'id': _productId,
-                                        'name': _name,
-                                        'price': widget.product['price'] ?? _price,
-                                      });
-                                      ScaffoldMessenger.of(context)
-                                        ..clearSnackBars()
-                                        ..showSnackBar(SnackBar(
+                        ),
+                        if (widget.isFeatured) const SizedBox(width: 6),
+                        if (widget.isFeatured)
+                          GestureDetector(
+                            onTap: _inStock && !inCart
+                                ? () {
+                                    cartProvider.addToCart({
+                                      'id': _productId,
+                                      'name': _name,
+                                      'price':
+                                          widget.product['price'] ?? _price,
+                                    });
+                                    ScaffoldMessenger.of(context)
+                                      ..clearSnackBars()
+                                      ..showSnackBar(
+                                        SnackBar(
                                           content: Text(
                                             'Added to cart',
-                                            style: GoogleFonts.plusJakartaSans(fontSize: 13),
+                                            style: GoogleFonts.plusJakartaSans(
+                                              fontSize: 13,
+                                            ),
                                           ),
-                                          backgroundColor: AppTheme.primaryColor,
+                                          backgroundColor:
+                                              AppTheme.primaryColor,
                                           behavior: SnackBarBehavior.floating,
                                           shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(10),
+                                            borderRadius: BorderRadius.circular(
+                                              10,
+                                            ),
                                           ),
-                                          margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                                          margin: const EdgeInsets.fromLTRB(
+                                            16,
+                                            0,
+                                            16,
+                                            16,
+                                          ),
                                           duration: const Duration(seconds: 1),
-                                        ));
-                                    }
-                                  : null,
-                              child: Container(
-                                width: 30,
-                                height: 30,
-                                decoration: BoxDecoration(
-                                  color: _inStock
-                                      ? AppTheme.primaryColor
-                                      : AppTheme.dividerColor,
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                child: Icon(
-                                  Icons.add_rounded,
-                                  color: _inStock ? Colors.white : AppTheme.textSecondary,
-                                  size: 18,
-                                ),
+                                        ),
+                                      );
+                                  }
+                                : null,
+                            child: Container(
+                              width: 30,
+                              height: 30,
+                              decoration: BoxDecoration(
+                                color: _inStock && !inCart
+                                    ? AppTheme.primaryColor
+                                    : Colors.grey.shade300,
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Icon(
+                                Icons.add_rounded,
+                                color: _inStock && !inCart
+                                    ? Colors.white
+                                    : AppTheme.textSecondary,
+                                size: 18,
                               ),
                             ),
-                        ],
-                      ),
-                    ],
-                  ),
+                          ),
+                      ],
+                    ),
+                  ],
                 ),
               ),
             ],
