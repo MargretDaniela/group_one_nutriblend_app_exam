@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'providers/auth_provider.dart';
 import 'providers/cart_provider.dart';
 import 'providers/wishlist_provider.dart';
+import 'Screens/splash_screen.dart';
 import 'screens/splash_screen.dart';
 import 'utils/theme.dart';
 

@@ -430,5 +430,12 @@ class _Item {
   final Color bg;
   final String title;
   final VoidCallback? onTap;
+
+  const _MenuItem({
+    required this.icon,
+    required this.iconColor,
+    required this.iconBg,
+    required this.title,
+  }) : onTap = null;
   const _Item({required this.icon, required this.color, required this.bg, required this.title, this.onTap});
 }

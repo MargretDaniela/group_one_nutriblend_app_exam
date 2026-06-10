@@ -230,19 +230,14 @@ class _LoginScreenState extends State<LoginScreen>
   Widget _buildBrand() {
     return Row(
       children: [
-        Container(
-          width: 44,
-          height: 44,
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [Color(0xFF81C784), Color(0xFF2E7D32)],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            borderRadius: BorderRadius.circular(14),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(14),
+          child: Image.asset(
+            'assets/logo.png',
+            width: 44,
+            height: 44,
+            fit: BoxFit.cover,
           ),
-          child:
-              const Icon(Icons.eco_rounded, color: Colors.white, size: 24),
         ),
         const SizedBox(width: 12),
         Column(

@@ -1,5 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
+import '../providers/cart_provider.dart';
+import '../providers/wishlist_provider.dart';
+import '../services/product_service.dart';
+import '../utils/theme.dart';
+import 'home_screen.dart';
+import 'wishlist_screen.dart';
 import 'package:shimmer/shimmer.dart';
 import '../services/product_service.dart';
 import '../utils/theme.dart';
@@ -181,6 +188,76 @@ class _ProductsScreenState extends State<ProductsScreen> {
                   color: AppTheme.primaryDark)),
         ],
       ),
+      actions: [
+        Consumer<WishlistProvider>(
+          builder: (context, wishlist, _) => Stack(
+            alignment: Alignment.center,
+            children: [
+              IconButton(
+                onPressed: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (_) => const WishlistScreen()));
+                },
+                icon: Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF1F8E9),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(
+                    Icons.favorite_outline_rounded,
+                    color: AppTheme.primaryColor,
+                    size: 20,
+                  ),
+                ),
+              ),
+              if (wishlist.count > 0)
+                Positioned(
+                  top: 6,
+                  right: 6,
+                  child: Container(
+                    width: 16,
+                    height: 16,
+                    decoration: const BoxDecoration(
+                      color: AppTheme.primaryColor,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Center(
+                      child: Text(
+                        wishlist.count > 9 ? '9+' : '${wishlist.count}',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 9,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ),
+        IconButton(
+          onPressed: () {
+            _loadCategories();
+            _loadPage(1);
+          },
+          icon: Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              color: const Color(0xFFF1F8E9),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: const Icon(
+              Icons.refresh_rounded,
+              color: AppTheme.primaryColor,
+              size: 20,
+            ),
+          ),
+        ),
+        const SizedBox(width: 8),
+      ],
       bottom: PreferredSize(
         preferredSize: const Size.fromHeight(0.5),
         child: Container(height: 0.5, color: AppTheme.divider),
